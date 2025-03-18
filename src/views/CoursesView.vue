@@ -42,27 +42,33 @@
         </div>
 
         <div class="flex flex-col">
-          <label for="categoryId" class="block text-sm font-medium pt-3">ID Categoría</label>
-          <input
-            v-model.number="newCourse.categoryId"
-            type="number"
+          <label for="categoryId" class="block text-sm font-medium pt-3">Categoría</label>
+          <select
+            v-model="newCourse.categoryId"
             id="categoryId"
             class="mt-2 block w-full max-w-2xl h-12 rounded-md border-2 border-gray-300 !bg-[#262626] !text-white focus:border-vue-green focus:ring-2 focus:ring-vue-green sm:text-sm p-3"
-            placeholder="Ingrese el ID de la categoría"
             required
-          />
+          >
+            <option value="" disabled>Seleccione una categoría</option>
+            <option v-for="category in categories" :key="category.id" :value="category.id">
+              {{ category.name }}
+            </option>
+          </select>
         </div>
 
         <div class="flex flex-col">
-          <label for="instructorId" class="block text-sm font-medium pt-3">ID Instructor</label>
-          <input
-            v-model.number="newCourse.instructorId"
-            type="number"
+          <label for="instructorId" class="block text-sm font-medium pt-3"> Instructor</label>
+          <select
+            v-model="newCourse.instructorId"
             id="instructorId"
             class="mt-2 block w-full max-w-2xl h-12 rounded-md border-2 border-gray-300 !bg-[#262626] !text-white focus:border-vue-green focus:ring-2 focus:ring-vue-green sm:text-sm p-3"
-            placeholder="Ingrese el ID del instructor"
             required
-          />
+          >
+            <option value="" disabled>Seleccione un instructor</option>
+            <option v-for="instructor in instructors" :key="instructor.id" :value="instructor.id">
+              {{ instructor.username }}
+            </option>
+          </select>
         </div>
 
         <div class="flex justify-start pt-3">
@@ -119,7 +125,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import Swal from 'sweetalert2';
-import { getCourses, createCourse, deleteCourse } from '@/services/api';
+import { getCourses, createCourse, deleteCourse, getUserByRoleName, getCategories } from '@/services/api';
 import api from '@/services/api';
 
 interface CategoryDTO {
@@ -158,8 +164,21 @@ const newCourse = ref<CreateCourseDTO>({
   instructorId: null
 });
 
+const instructors = ref<Array<{ id: number; username: string }>>([]);
+const categories = ref<Array<{ id: number; name: string }>>([]);
+
 onMounted(async () => {
   await fetchCourses();
+  try {
+    const [instructorsResponse, categoriesResponse] = await Promise.all([
+      getUserByRoleName('INSTRUCTOR'),
+      getCategories()
+    ]);
+    instructors.value = instructorsResponse.data;
+    categories.value = categoriesResponse.data;
+  } catch (error) {
+    console.error('Error al cargar datos:', error);
+  }
 });
 
 const fetchCourses = async () => {

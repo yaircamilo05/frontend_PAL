@@ -69,5 +69,7 @@ export const deleteCourse = (id: number) => api.delete(`/courses/delete/${id}`);
 export const getUsers = () => api.get<User[]>("/users/all");
 export const createUser = (data: User) => api.post("/users/create", data);
 export const deleteUser = (id: number) => api.delete(`/users/delete/${id}`);
+export const getUserByRoleName = (roleName: string) => api.get<User[]>(`/users/by-role?role=${roleName}`);
+
 
 export default api;
