@@ -73,14 +73,15 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import Swal from 'sweetalert2';
-import { getUsers, createUser, deleteUser } from '@/services/api';
+import api from '@/services/api';
 
 const users = ref([]);
 const newUser = ref({ username: '', password: '' });
 
 const fetchUsers = async () => {
   try {
-    users.value = (await getUsers()).data;
+    const response = await api.get('/users/all');
+    users.value = response.data;
   } catch (error) {
     Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudieron cargar los usuarios.' });
   }
@@ -88,12 +89,54 @@ const fetchUsers = async () => {
 
 const createNewUser = async () => {
   try {
-    const response = await createUser(newUser.value);
+    const response = await api.post('/users/create', newUser.value);
     users.value.push(response.data);
     newUser.value = { username: '', password: '' };
     Swal.fire({ icon: 'success', title: '¡Éxito!', text: 'Usuario creado correctamente.', timer: 1500, showConfirmButton: false });
   } catch (error) {
     Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo crear el usuario.' });
+  }
+};
+
+const startEdit = async (user) => {
+  const { value: formValues } = await Swal.fire({
+    title: 'Editar Usuario',
+    html:
+      '<input id="swal-username" class="swal2-input" placeholder="Nombre de usuario" value="' + user.username + '">' +
+      '<input id="swal-password" class="swal2-input" type="password" placeholder="Contraseña (dejar en blanco para mantener la actual)">',
+    focusConfirm: false,
+    showCancelButton: true,
+    cancelButtonText: 'Cancelar',
+    confirmButtonText: 'Guardar',
+    confirmButtonColor: '#42b983',
+    cancelButtonColor: '#34495e',
+    preConfirm: () => {
+      return {
+        username: document.getElementById('swal-username').value,
+        password: document.getElementById('swal-password').value
+      }
+    }
+  });
+
+  if (formValues) {
+    try {
+      const response = await api.put(`/users/update/${user.id}`, formValues);
+      const index = users.value.findIndex((u) => u.id === user.id);
+      users.value[index] = response.data;
+      Swal.fire({
+        icon: 'success',
+        title: '¡Actualizado!',
+        text: 'Usuario actualizado correctamente.',
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudo actualizar el usuario.',
+      });
+    }
   }
 };
 
@@ -111,7 +154,7 @@ const confirmDeleteUser = async (id) => {
 
   if (result.isConfirmed) {
     try {
-      await deleteUser(id);
+      await api.delete(`/users/delete/${id}`);
       users.value = users.value.filter(user => user.id !== id);
       Swal.fire({ icon: 'success', title: '¡Eliminado!', text: 'Usuario eliminado correctamente.', timer: 1500, showConfirmButton: false });
     } catch (error) {

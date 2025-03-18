@@ -125,7 +125,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import Swal from 'sweetalert2';
-import { getCourses, createCourse, deleteCourse, getUserByRoleName, getCategories } from '@/services/api';
 import api from '@/services/api';
 
 interface CategoryDTO {
@@ -171,8 +170,8 @@ onMounted(async () => {
   await fetchCourses();
   try {
     const [instructorsResponse, categoriesResponse] = await Promise.all([
-      getUserByRoleName('INSTRUCTOR'),
-      getCategories()
+      api.get('/users/by-role?role=INSTRUCTOR'),
+      api.get('/categories/all')
     ]);
     instructors.value = instructorsResponse.data;
     categories.value = categoriesResponse.data;
@@ -183,7 +182,7 @@ onMounted(async () => {
 
 const fetchCourses = async () => {
   try {
-    const response = await getCourses();
+    const response = await api.get('/courses/all');
     courses.value = response.data;
   } catch (error) {
     Swal.fire({
@@ -196,7 +195,7 @@ const fetchCourses = async () => {
 
 const createNewCourse = async () => {
   try {
-    const response = await createCourse(newCourse.value);
+    const response = await api.post('/courses/create', newCourse.value);
     courses.value.push(response.data);
     newCourse.value = {
       title: '',
@@ -283,7 +282,7 @@ const confirmDelete = async (id: number) => {
 
   if (result.isConfirmed) {
     try {
-      await deleteCourse(id);
+      await api.delete(`/courses/delete/${id}`);
       courses.value = courses.value.filter((course) => course.id !== id);
       Swal.fire({
         icon: 'success',
