@@ -1,8 +1,8 @@
 <template>
-  <div class="container mx-auto p-8 bg-vue-gray-light text-vue-text-light">
+  <div class="mx-auto p-8 bg-vue-gray-light text-vue-text-light">
     <h1 class="text-3xl font-bold mb-10">Gestión de Categorías</h1>
 
-    <div class="bg-[#1c1c1c] p-6 rounded-lg shadow-md mb-10">
+    <div class="contenedor_interno">
       <h2 class="text-xl font-semibold mb-6">Crear Nueva Categoría</h2>
       <form @submit.prevent="createNewCategory" class="space-y-6">
         <div class="flex flex-col">
@@ -27,7 +27,7 @@
       </form>
     </div>
 
-    <div class="bg-[#1c1c1c] p-6 rounded-lg shadow-md">
+    <div class="contenedor_interno">
       <h2 class="text-xl font-semibold mb-6">Lista de Categorías</h2>
       <div v-if="categories.length === 0" class="text-vue-gray-light">
         No hay categorías disponibles.
