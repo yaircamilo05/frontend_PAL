@@ -1,5 +1,5 @@
 <template>
-  <div class="mx-auto p-8 bg-vue-gray-light text-vue-text-light">
+  <div class="contenedor_general">
     <h1 class="text-3xl font-bold mb-10">Gestión de Categorías</h1>
 
     <div class="contenedor_interno">
