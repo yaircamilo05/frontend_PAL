@@ -1,3 +1,4 @@
+import type { Role } from "@/models/Roles.moles";
 import axios from "axios";
 
 const API_BASE_URL = "http://localhost:8080/api";
@@ -70,6 +71,10 @@ export const getUsers = () => api.get<User[]>("/users/all");
 export const createUser = (data: User) => api.post("/users/create", data);
 export const deleteUser = (id: number) => api.delete(`/users/delete/${id}`);
 export const getUserByRoleName = (roleName: string) => api.get<User[]>(`/users/by-role?role=${roleName}`);
+
+//Roles
+
+export const getRoles = () => api.get<Role[]>("/roles/all");
 
 
 export default api;
