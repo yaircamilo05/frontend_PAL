@@ -25,6 +25,26 @@ a,
   padding: 2rem;
 }
 
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  background-color: #ff33a6; /* Color rosa fuerte */
+  color: white;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  margin: 5px;
+  cursor: pointer;
+}
+
+.tag .close {
+  margin-left: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
 @media (prefers-color-scheme: dark) {
 
 }
