@@ -30,20 +30,27 @@
 
     <!-- Modal -->
     <Modal v-model:isOpen="showEditModal" title="Editar Usuario">
-      <UserForm :user="selectedUser" @submit="submitEditForm" />
+      <UserForm 
+        v-if="selectedUser" 
+        :user="selectedUser" 
+        :isCreateMode="false" 
+        @submit="submitEditForm" 
+      />
     </Modal>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, type PropType, ref } from 'vue';
-import type { User } from '@/models/User.model';
-import Modal from '../components/modal.vue';
+import type { User, UserCreate } from '@/models/User.model';
+import Modal from '@/components/modal.vue';
+import UserForm from './UserForm.vue';
 
 export default defineComponent({
   name: 'UserList',
   components: {
-    Modal
+    Modal,
+    UserForm
   },
   props: {
     users: {
@@ -51,19 +58,23 @@ export default defineComponent({
       required: true
     }
   },
-  emits: ['delete'],
+  emits: ['delete', 'edit'],
   setup(props, { emit }) {
     const showEditModal = ref(false);
-    const selectedUser = ref<User | null>(null);
+    const selectedUser = ref<UserCreate | null>(null);
 
     const openEditModal = (user: User) => {
-      selectedUser.value = { ...user }; // Clonar el usuario para evitar modificaciones directas
+      // Mapear el usuario con contraseña vacía y mantener el id
+      selectedUser.value = {
+        username: user.username,
+        password: '', // Contraseña vacía
+        roles: user.roles
+      };
       showEditModal.value = true;
     };
 
-    const submitEditForm = () => {
-      // Este método se usa para el botón de guardar en el footer
-      console.log('Guardar cambios para:', selectedUser.value);
+    const submitEditForm = (updatedUser: UserCreate) => {
+      emit('edit', updatedUser); // Emitir el usuario actualizado al componente padre
       showEditModal.value = false;
     };
 

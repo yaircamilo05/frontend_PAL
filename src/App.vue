@@ -8,8 +8,6 @@ import { RouterLink, RouterView } from 'vue-router'
     <div class="wrapper">
       <HelloWorld msg="Sistema PAL" />
       <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
         <RouterLink to="/categories">Categorías</RouterLink>
         <RouterLink to="/content">Contenido</RouterLink>
         <RouterLink to="/courses">Cursos</RouterLink>
