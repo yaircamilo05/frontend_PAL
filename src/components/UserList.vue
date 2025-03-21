@@ -8,9 +8,9 @@
       <li
         v-for="user in users"
         :key="user.id"
-        class="flex items-center justify-between p-3.5 m-3 bg-[#212121] rounded-md"
+        class="flex items-center justify-between p-3.5 m-3 bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100 rounded-md border-2 border-gray-300 focus-within:border-vue-green focus-within:ring-2 focus-within:ring-vue-green"
       >
-        <span>{{ user.username }}</span>
+        <span class="text-sm font-medium">{{ user.username }}</span>
         <div class="flex items-center gap-4">
           <button
             @click="openEditModal(user)"
@@ -30,21 +30,7 @@
 
     <!-- Modal -->
     <Modal v-model:isOpen="showEditModal" title="Editar Usuario">
-      <p class="text-gray-300">Aquí puedes agregar contenido personalizado para el modal.</p>
-      <template #footer>
-        <button 
-          @click="showEditModal = false" 
-          class="px-4 py-2 rounded-md cursor-pointer font-medium text-sm transition-all duration-200 bg-transparent text-gray-400 border border-gray-400 hover:text-white hover:border-white"
-        >
-          Cancelar
-        </button>
-        <button 
-          @click="submitEditForm" 
-          class="px-4 py-2 rounded-md cursor-pointer font-medium text-sm transition-all duration-200 bg-pink-500 text-white border border-pink-500 hover:bg-pink-600"
-        >
-          Guardar Cambios
-        </button>
-      </template>
+      <UserForm :user="selectedUser" @submit="submitEditForm" />
     </Modal>
   </div>
 </template>
@@ -52,7 +38,7 @@
 <script lang="ts">
 import { defineComponent, type PropType, ref } from 'vue';
 import type { User } from '@/models/User.model';
-import Modal from '@/components/modal.vue';
+import Modal from '../components/modal.vue';
 
 export default defineComponent({
   name: 'UserList',
