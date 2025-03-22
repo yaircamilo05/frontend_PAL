@@ -46,7 +46,7 @@ import type { User} from '@/models/User.model';
 import Modal from '@/components/modal.vue';
 import UserForm from './UserForm.vue';
 import api, { deleteUser } from '@/services/api';
-import Swal from 'sweetalert2';
+import { success, error, confirmation } from '../composables/alerts.ts';
 
 export default defineComponent({
   name: 'UserList',
@@ -67,6 +67,11 @@ export default defineComponent({
     const editingUserId = ref<number | null>(null);
     // Copia local de la lista de usuarios para manipulación reactiva
     const localUsers = ref<User[]>([...props.users]);
+    
+    // Importar funciones de alertas
+    const { showToast } = success();
+    const { showError } = error();
+    const { confirmDeletion } = confirmation();
 
     // Mantener la lista local sincronizada con las props
     watch(() => props.users, (newUsers) => {
@@ -89,17 +94,8 @@ export default defineComponent({
     };
 
     const handleDeleteUser = async (userId: number) => {
-      // Mostrar diálogo de confirmación
-      const result = await Swal.fire({
-        title: '¿Estás seguro?',
-        text: 'Esta acción no se puede deshacer',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar'
-      });
+      // Mostrar diálogo de confirmación usando la función del composable
+      const result = await confirmDeletion();
       
       // Si el usuario confirma la eliminación
       if (result.isConfirmed) {
@@ -113,23 +109,13 @@ export default defineComponent({
           // Notificar al componente padre que el usuario ha sido eliminado
           emit('user-deleted', userId);
           
-          // Mostrar notificación de éxito
-          Swal.fire({
-            icon: 'success',
-            title: '¡Usuario eliminado!',
-            text: 'El usuario ha sido eliminado correctamente.',
-            timer: 2000,
-            showConfirmButton: false
-          });
+          // Mostrar notificación de éxito usando el composable
+          showToast('¡Usuario eliminado!', 'El usuario ha sido eliminado correctamente.');
         } catch (error) {
           console.error('Error al eliminar el usuario:', error);
           
-          // Mostrar notificación de error
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'No se pudo eliminar el usuario. Por favor, intenta de nuevo.',
-          });
+          // Mostrar notificación de error usando el composable
+          showError('Error', 'No se pudo eliminar el usuario. Por favor, intenta de nuevo.');
         }
       }
     };
@@ -162,26 +148,16 @@ export default defineComponent({
         // Notificar al componente padre que el usuario ha sido actualizado
         emit('user-updated', response.data);
         
-        // Mostrar notificación de éxito
-        Swal.fire({
-          icon: 'success',
-          title: '¡Usuario actualizado!',
-          text: 'El usuario ha sido actualizado correctamente.',
-          timer: 2000,
-          showConfirmButton: false
-        });
+        // Mostrar notificación de éxito usando el composable
+        showToast('¡Usuario actualizado!', 'El usuario ha sido actualizado correctamente.');
         
         // Cerrar el modal
         showEditModal.value = false;
       } catch (error) {
         console.error('Error al actualizar el usuario:', error);
         
-        // Mostrar notificación de error
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'No se pudo actualizar el usuario. Por favor, intenta de nuevo.',
-        });
+        // Mostrar notificación de error usando el composable
+        showError('Error', 'No se pudo actualizar el usuario. Por favor, intenta de nuevo.');
       }
     };
 
