@@ -6,28 +6,28 @@
         v-model="formData.username"
         type="text"
         id="username"
-        class="mt-2 block w-full max-w-2xl h-12 rounded-md border-2 border-gray-300 bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100 focus:border-vue-green focus:ring-2 focus:ring-vue-green sm:text-sm p-3"
+        class="mt-2 block w-full max-w-2xl h-12 rounded-md border-2 border-gray-300 bg-gray-100 text-gray-900 dark:bg-[#292929] dark:text-gray-100 focus:border-vue-green focus:ring-2 focus:ring-vue-green sm:text-sm p-3"
         placeholder="Ingrese el nombre de usuario"
         required
       />
     </div>
-    <div class="flex flex-col">
+    <div class="flex flex-col pt-3">
       <label for="password" class="block text-sm font-medium">Contraseña</label>
       <input
         v-model="formData.password"
         type="password"
         id="password"
-        class="mt-2 block w-full max-w-2xl h-12 rounded-md border-2 border-gray-300 bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100 focus:border-vue-green focus:ring-2 focus:ring-vue-green sm:text-sm p-3"
+        class="mt-2 block w-full max-w-2xl h-12 rounded-md border-2 border-gray-300 bg-gray-100 text-gray-900 dark:bg-[#292929] dark:text-gray-100 focus:border-vue-green focus:ring-2 focus:ring-vue-green sm:text-sm p-3"
         placeholder="Ingrese la contraseña"
         :required="isCreateMode"
       />
     </div>
-    <div class="flex flex-col">
+    <div class="flex flex-col pt-3">
       <label for="roles" class="block text-sm font-medium">Roles</label>
       <select
         v-model="selectedRoleId"
         id="roles"
-        class="mt-2 block w-full max-w-2xl h-12 rounded-md border-2 border-gray-300 bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100 focus:border-vue-green focus:ring-2 focus:ring-vue-green sm:text-sm p-3"
+        class="mt-2 block w-full max-w-2xl h-12 rounded-md border-2 border-gray-300 bg-gray-100 text-gray-900 dark:bg-[#292929] dark:text-gray-100 focus:border-vue-green focus:ring-2 focus:ring-vue-green sm:text-sm p-3"
       >
         <option value="">Seleccione un rol</option>
         <option
@@ -80,7 +80,7 @@
 import { defineComponent, type PropType } from 'vue';
 import api from '@/services/api';
 import type { UserCreate } from '@/models/User.model';
-import type { Role } from '@/models/Roles.moles';
+import type { Role } from '@/models/Roles.model';
 
 export default defineComponent({
   name: 'UserForm',

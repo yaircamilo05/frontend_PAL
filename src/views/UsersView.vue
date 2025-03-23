@@ -21,8 +21,8 @@
 import { ref, onMounted } from 'vue';
 import Swal from 'sweetalert2';
 import api from '@/services/api';
-import UserForm from '@/components/UserForm.vue';
-import UserList from '@/components/UserList.vue';
+import UserForm from '@/components/Users/UserForm.vue';
+import UserList from '@/components/Users/UserList.vue';
 
 const users = ref([]);
 const newUser = ref({ username: '', password: '' });
