@@ -48,22 +48,11 @@ const fetchCourses = async () => {
 
 const createNewCourse = async (courseData) => {
   try {
-    await api.post('/courses/create', courseData);
-    await fetchCourses();
-    Swal.fire({
-      icon: 'success',
-      title: '¡Éxito!',
-      text: 'Curso creado correctamente.',
-      timer: 1500,
-      showConfirmButton: false
-    });
+    const response = await api.post('/courses/create', courseData);
+    courses.value.push(response.data);
+    Swal.fire({ icon: 'success', title: '¡Éxito!', text: 'Curso creado correctamente.', timer: 1500, showConfirmButton: false });
   } catch (error) {
-    console.error('Error al crear curso:', error);
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'No se pudo crear el curso.'
-    });
+    Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo crear el curso.' });
   }
 };
 

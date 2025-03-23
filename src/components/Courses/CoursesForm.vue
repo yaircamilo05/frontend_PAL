@@ -2,7 +2,7 @@
   <form @submit.prevent="handleSubmit" class="space-y-6">
     <div class="flex flex-col">
       <label for="courseName" class="block text-sm font-medium">Nombre del Curso</label>
-      <input v-model="formData.courseName" type="text" id="courseName"
+      <input v-model="formData.title" type="text" id="courseName"
         class="mt-2 block w-full max-w-2xl h-12 rounded-md border-2 border-gray-300 bg-gray-100 text-gray-900 dark:bg-[#292929] dark:text-gray-100 focus:border-vue-green focus:ring-2 focus:ring-vue-green sm:text-sm p-3"
         placeholder="Ingrese el nombre del curso" required />
     </div>
@@ -30,7 +30,7 @@
         class="mt-2 block w-full max-w-2xl h-12 rounded-md border-2 border-gray-300 bg-gray-100 text-gray-900 dark:bg-[#292929] dark:text-gray-100 focus:border-vue-green focus:ring-2 focus:ring-vue-green sm:text-sm p-3"
         required>
         <option value="">Seleccione una categoría</option>
-        <option v-for="category in availableCategories" :key="category.id" :value="category.id">
+        <option v-for="category in categories" :key="category.id" :value="category.id">
           {{ category.name }}
         </option>
       </select>
@@ -42,18 +42,17 @@
         class="mt-2 block w-full max-w-2xl h-12 rounded-md border-2 border-gray-300 bg-gray-100 text-gray-900 dark:bg-[#292929] dark:text-gray-100 focus:border-vue-green focus:ring-2 focus:ring-vue-green sm:text-sm p-3"
         required>
         <option value="">Seleccione un instructor</option>
-        <option v-for="instructor in availableInstructors" :key="instructor.id" :value="instructor.id">
+        <option v-for="instructor in instructors" :key="instructor.id" :value="instructor.id">
           {{ instructor.username }}
         </option>
       </select>
-      <p v-if="instructorsLoading" class="text-sm text-gray-500 mt-1">Cargando instructores...</p>
-      <p v-else-if="availableInstructors.length === 0" class="text-sm text-red-500 mt-1">No se encontraron instructores
-        disponibles.</p>
+      <p v-if="instructors.length === 0" class="text-sm text-red-500 mt-1">No se encontraron instructores disponibles.
+      </p>
     </div>
 
     <div class="flex justify-start pt-3">
       <button type="submit"
-        class="inline-flex items-center justify-center px-6 py-3 bg-vue-green text-green-500 hover:text-green-700 border-green-500 rounded-md hover:bg-vue-green-dark focus:outline-none focus:ring-2 focus:ring-vue-green border-2 border-vue-green"
+        class="inline-flex items-center justify-center px-6 py-3 bg-vue-green text-white hover:text-gray-100 border-green-500 rounded-md hover:bg-vue-green-dark focus:outline-none focus:ring-2 focus:ring-vue-green border-2 border-vue-green"
         :disabled="isSubmitting">
         {{ isSubmitting ? 'Creando...' : 'Crear Curso' }}
       </button>
@@ -62,46 +61,38 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, type PropType } from 'vue';
 import api from '@/services/api';
-
-// Definimos interfaces para nuestros tipos
-interface Instructor {
-  id: number;
-  username: string;
-  roles: Array<{ id: number, name: string }>;
-  [key: string]: any; // Para permitir otras propiedades
-}
-
-interface Category {
-  id: number;
-  name: string;
-  [key: string]: any; // Para permitir otras propiedades
-}
-
-interface FormData {
-  courseName: string;
-  description: string;
-  price: string;
-  categoryId: string | number;
-  instructorId: string | number;
-}
+import type { CourseCreate } from '@/models/Course.model';
+import type { Instructor } from '@/models/User.model';
+import type { Category } from '@/models/Category.model';
 
 export default defineComponent({
   name: 'CourseForm',
+  props: {
+    course: {
+      type: Object as PropType<CourseCreate>,
+      default: () => ({ title: '', description: '', price: 0, categoryId: 0, instructorId: 0 }),
+    },
+    isCreateMode: {
+      type: Boolean,
+      default: true,
+    }
+  },
+  emits: ['submit'],
   data() {
     return {
       formData: {
-        courseName: '',
-        description: '',
-        price: '',
-        categoryId: '',
-        instructorId: ''
-      } as FormData,
-      availableCategories: [] as Category[],
-      availableInstructors: [] as Instructor[],
-      categoriesLoading: false,
-      instructorsLoading: false,
+        title: this.course.title || '',
+        description: typeof this.course.description === 'string'
+          ? this.course.description
+          : String(this.course.description || ''),
+        price: this.course.price || 0,
+        categoryId: this.course.categoryId || 0,
+        instructorId: this.course.instructorId || 0
+      },
+      instructors: [] as Instructor[],
+      categories: [] as Category[],
       isSubmitting: false
     };
   },
@@ -111,73 +102,37 @@ export default defineComponent({
   },
   methods: {
     async fetchCategories() {
-      this.categoriesLoading = true;
       try {
         const response = await api.get('/categories/all');
-        this.availableCategories = response.data;
+        this.categories = response.data;
+        console.log('Categorías cargadas:', this.categories);
       } catch (error) {
         console.error('Error al obtener categorías:', error);
-      } finally {
-        this.categoriesLoading = false;
       }
     },
+
     async fetchInstructors() {
-      this.instructorsLoading = true;
       try {
-        // Obtenemos los instructores
         const response = await api.get('/users/by-role', {
           params: { role: 'INSTRUCTOR' }
         });
-
-        console.log('Respuesta del servidor (instructores):', response.data);
-
-        // Usar asignación segura con tipo explícito para evitar problemas de tipado
-        if (response.data && Array.isArray(response.data)) {
-          // Utilizamos una conversión explícita a nuestro tipo Instructor[]
-          this.availableInstructors = response.data as Instructor[];
-          console.log('Instructores procesados:', this.availableInstructors);
-        } else {
-          console.error('Formato de respuesta inesperado:', response.data);
-          this.availableInstructors = [];
-        }
+        this.instructors = response.data;
+        console.log('Instructores cargados:', this.instructors);
       } catch (error) {
         console.error('Error al obtener instructores:', error);
-      } finally {
-        this.instructorsLoading = false;
       }
     },
+
     async handleSubmit() {
       this.isSubmitting = true;
       try {
-        const courseData = {
-          title: this.formData.courseName, // Cambiar de courseName a title
-          description: this.formData.description,
-          price: parseFloat(this.formData.price),
-          categoryId: this.formData.categoryId,
-          instructorId: this.formData.instructorId
-        };
-
-        console.log('Enviando datos del curso:', courseData);
-
-        // También debes descomentar esta sección para realmente enviar los datos
-        const response = await api.post('/courses/create', courseData);
-        console.log('Curso creado con éxito:', response.data);
-        this.$emit('submit', response.data);
-        this.resetForm();
+        await api.post('/courses/create', this.formData);
+        this.$emit('submit', this.formData);
       } catch (error) {
-        console.error('Error al crear el curso:', error);
+        console.error('Error al crear curso:', error);
       } finally {
         this.isSubmitting = false;
       }
-    },
-    resetForm() {
-      this.formData = {
-        courseName: '',
-        description: '',
-        price: '',
-        categoryId: '',
-        instructorId: ''
-      };
     }
   }
 });
