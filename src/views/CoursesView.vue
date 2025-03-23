@@ -5,21 +5,13 @@
     <CoursesManagement v-slot="{ instructors, categories }">
       <div class="contenedor_interno">
         <h2 class="text-xl font-semibold mb-6">Crear Nuevo Curso</h2>
-        <CourseForm 
-          :isCreateMode="true" 
-          :categories="categories ?? []" 
-          :instructors="instructors ?? []" 
-          @submit="createNewCourse" 
-        />
+        <CourseForm :isCreateMode="true" :categories="categories ?? []" :instructors="instructors ?? []"
+          @submit="createNewCourse" />
       </div>
     </CoursesManagement>
 
     <div class="contenedor_interno">
-      <CourseList 
-        :courses="courses" 
-        @edit="startEdit" 
-        @delete="confirmDeleteCourse" 
-      />
+      <CourseList :courses="courses" @edit="startEdit" @delete="confirmDeleteCourse" />
     </div>
   </div>
 </template>
@@ -44,10 +36,10 @@ const fetchCourses = async () => {
     courses.value = response.data;
   } catch (error) {
     console.error('Error al cargar cursos:', error);
-    Swal.fire({ 
-      icon: 'error', 
-      title: 'Error', 
-      text: 'No se pudieron cargar los cursos.' 
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'No se pudieron cargar los cursos.'
     });
   } finally {
     isLoading.value = false;
@@ -58,19 +50,19 @@ const createNewCourse = async (courseData) => {
   try {
     await api.post('/courses/create', courseData);
     await fetchCourses();
-    Swal.fire({ 
-      icon: 'success', 
-      title: '¡Éxito!', 
-      text: 'Curso creado correctamente.', 
-      timer: 1500, 
-      showConfirmButton: false 
+    Swal.fire({
+      icon: 'success',
+      title: '¡Éxito!',
+      text: 'Curso creado correctamente.',
+      timer: 1500,
+      showConfirmButton: false
     });
   } catch (error) {
     console.error('Error al crear curso:', error);
-    Swal.fire({ 
-      icon: 'error', 
-      title: 'Error', 
-      text: 'No se pudo crear el curso.' 
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'No se pudo crear el curso.'
     });
   }
 };
