@@ -2,6 +2,7 @@
   <div class="container mx-auto p-8 bg-vue-gray-light text-vue-text-light">
     <h1 class="text-3xl font-bold mb-10">Gestión de Cursos</h1>
 
+<<<<<<< HEAD
     <div class="bg-[#1c1c1c] p-6 rounded-lg shadow-md mb-10">
       <h2 class="text-xl font-semibold mb-6">Crear Nuevo Curso</h2>
       <form @submit.prevent="createNewCourse" class="space-y-6">
@@ -118,6 +119,18 @@
           </div>
         </li>
       </ul>
+=======
+    <CoursesManagement v-slot="{ instructors, categories }">
+      <div class="contenedor_interno">
+        <h2 class="text-xl font-semibold mb-6">Crear Nuevo Curso</h2>
+        <CourseForm :isCreateMode="true" :categories="categories ?? []" :instructors="instructors ?? []"
+          @submit="createNewCourse" />
+      </div>
+    </CoursesManagement>
+
+    <div class="contenedor_interno">
+      <CourseList :courses="courses" @edit="startEdit" @delete="confirmDeleteCourse" />
+>>>>>>> d6a4380 (resubida de cambios)
     </div>
   </div>
 </template>
@@ -185,6 +198,66 @@ const fetchCourses = async () => {
     const response = await api.get('/courses/all');
     courses.value = response.data;
   } catch (error) {
+<<<<<<< HEAD
+=======
+    console.error('Error al cargar cursos:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'No se pudieron cargar los cursos.'
+    });
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const createNewCourse = async (courseData) => {
+  try {
+    await api.post('/courses/create', courseData);
+    await fetchCourses();
+    Swal.fire({
+      icon: 'success',
+      title: '¡Éxito!',
+      text: 'Curso creado correctamente.',
+      timer: 1500,
+      showConfirmButton: false
+    });
+  } catch (error) {
+    console.error('Error al crear curso:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'No se pudo crear el curso.'
+    });
+  }
+};
+
+const startEdit = (course) => {
+  console.log('Editar curso:', course);
+};
+
+const confirmDeleteCourse = (courseId) => {
+  Swal.fire({
+    title: '¿Estás seguro?',
+    text: 'Esta acción no se puede revertir',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      deleteCourse(courseId);
+    }
+  });
+};
+
+const deleteCourse = async (courseId) => {
+  try {
+    await api.delete(`/courses/${courseId}`);
+    courses.value = courses.value.filter(course => course.id !== courseId);
+>>>>>>> d6a4380 (resubida de cambios)
     Swal.fire({
       icon: 'error',
       title: 'Error',
