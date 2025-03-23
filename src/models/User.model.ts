@@ -1,4 +1,4 @@
-import type { Role } from "./Roles.moles";
+import type { Role } from "./Roles.model";
 
 // Interfaz para crear un usuario
 export interface UserCreate {
@@ -12,4 +12,9 @@ export interface User {
     id: number;
     username: string;
     roles: Role[]; // El backend devuelve objetos Role completos
+}
+
+export interface Instructor {
+    id: number;
+    username: string;
 }

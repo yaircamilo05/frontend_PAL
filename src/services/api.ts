@@ -1,4 +1,4 @@
-import type { Role } from "@/models/Roles.moles";
+import type { Role } from "@/models/Roles.model";
 import type { UserCreate } from "@/models/User.model";
 import axios from "axios";
 

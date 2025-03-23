@@ -8,9 +8,9 @@
       <li
         v-for="user in localUsers"
         :key="user.id"
-        class="flex items-center justify-between p-3.5 m-3 bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100 rounded-md border-2 border-gray-300 focus-within:border-vue-green focus-within:ring-2 focus-within:ring-vue-green"
+        class="flex items-center justify-between p-3.5 m-3 bg-gray-100 text-gray-900 dark:bg-[#292929] dark:text-gray-100 rounded-md border-2 border-gray-300 focus-within:border-vue-green focus-within:ring-2 focus-within:ring-vue-green"
       >
-        <span class="text-sm font-medium">{{ user.username }}</span>
+        <span class="text-sm font-medium pr-10">{{ user.username }}</span>
         <div class="flex items-center gap-4">
           <button
             @click="openEditModal(user)"
@@ -46,7 +46,7 @@ import type { User} from '@/models/User.model';
 import Modal from '@/components/modal.vue';
 import UserForm from './UserForm.vue';
 import api, { deleteUser } from '@/services/api';
-import { success, error, confirmation } from '../composables/alerts.ts';
+import { success, error, confirmation } from '../../composables/alerts.ts';
 
 export default defineComponent({
   name: 'UserList',
