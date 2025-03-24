@@ -52,7 +52,7 @@
 
     <div class="flex justify-start pt-3">
       <button type="submit"
-        class="inline-flex items-center justify-center px-6 py-3 bg-vue-green text-white hover:text-gray-100 border-green-500 rounded-md hover:bg-vue-green-dark focus:outline-none focus:ring-2 focus:ring-vue-green border-2 border-vue-green"
+        class="inline-flex items-center justify-center px-6 py-3 bg-vue-green text-green-500 hover:border-green-300 hover:text-green-300 border-green-500 rounded-md hover:bg-vue-green-dark focus:outline-none focus:ring-2 focus:ring-vue-green border-2 border-vue-green"
         :disabled="isSubmitting">
         {{ isSubmitting ? 'Creando...' : 'Crear Curso' }}
       </button>
