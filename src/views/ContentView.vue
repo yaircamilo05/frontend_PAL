@@ -1,116 +1,132 @@
 <template>
-  <div class="p-6">
-    <h1 class="text-2xl font-bold mb-4">Gestión de Contenido</h1>
-
-    <div class="mb-4 flex gap-4">
-      <select v-model="selectedCourse" class="border p-2 rounded">
-        <option value="" disabled>Seleccione un curso</option>
-        <option v-for="course in courses" :key="course.id" :value="course.id">
-          {{ course.title }}
-        </option>
-      </select>
-
-      <input type="file" @change="handleFileUpload" class="border p-2 rounded" />
-      <button @click="uploadFile" class="bg-blue-500 text-white px-4 py-2 rounded">Subir</button>
-    </div>
-
-    <ul class="mt-4">
-      <li v-for="content in contents" :key="content.id" class="border-b py-2 flex justify-between items-center">
-        <div>
-          <a :href="content.url" target="_blank" class="text-blue-500 underline">
-            {{ content.type }}
-            <img :src="content.url" alt="Imagen" class="w-32 h-32 object-cover rounded-lg" />
-          </a>
-        </div>
-        <button @click="confirmDelete(content.id)" class="bg-red-500 text-white px-2 py-1 rounded">Eliminar</button>
-      </li>
-    </ul>
+  <div class="contenedor_general">
+     <h1 class="text-3xl font-bold mb-10">Gestión de Contenido</h1>
+     <div class="contenedor_interno">
+         <h2 class="text-xl font-semibold mb-6">Cargar Contenido</h2>
+         <ContentForm :isCreateMode="true" @submit="uploadContent" />
+     </div>
+     <div class="contenedor_interno">
+         <ContentList
+          :content="content"
+          @delete="confirmDeleteContent"
+         />
+     </div>
   </div>
-</template>
-
-<script setup>
-import { ref, onMounted } from 'vue';
-import Swal from 'sweetalert2';
-import { getContent, uploadContent, deleteContent, getCourses } from '../services/api'; // Importamos las funciones
-
-const selectedCourse = ref(null);
-const courses = ref([]);
-const contents = ref([]);
-const file = ref(null);
-
-onMounted(async () => {
-  await fetchCourses();
-  await fetchContents();
-});
-
-const fetchCourses = async () => {
+ </template>
+ 
+ <script setup>
+ import { ref, onMounted } from 'vue';
+ import Swal from 'sweetalert2';
+ import api from '@/services/api';
+ import ContentForm from '@/components/Content/ContentForm.vue';
+ import ContentList from '@/components/Content/ContentList.vue';
+ 
+ const content = ref([]);
+ 
+ const fetchContent = async () => {
+     try {
+         const response = await api.get('/content/all');
+         content.value = response.data;
+     } catch (error) {
+         console.error('Error al cargar contenidos:', error);
+         Swal.fire({ 
+             icon: 'error', 
+             title: 'Error', 
+             text: 'No se pudieron cargar los contenidos: ' + error.message 
+         });
+     }
+ };
+ 
+ const uploadContent = async (contentData) => {
   try {
-    const response = await getCourses();
-    courses.value = response.data;
+    // Crea un FormData para enviar los datos
+    const formData = new FormData();
+    formData.append('file', contentData.file);
+    formData.append('courseId', contentData.courseId);
+    
+    const response = await api.post('/content/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+
+    console.log('Respuesta del servidor:', response);
+    content.value.push(response.data);
+    
+    Swal.fire({
+      icon: 'success',
+      title: '¡Éxito!',
+      text: 'Contenido cargado correctamente.',
+      timer: 1500,
+      showConfirmButton: false
+    });
   } catch (error) {
-    console.error("Error obteniendo cursos:", error);
+    console.error('Error al cargar contenido:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'No se pudo cargar el contenido: ' + (error.response?.data?.message || error.message)
+    });
   }
 };
-
-const fetchContents = async () => {
+ 
+ const confirmDeleteContent = (contentId) => {
+     Swal.fire({
+         title: '¿Estás seguro?',
+         text: 'Esta acción no se puede revertir',
+         icon: 'warning',
+         showCancelButton: true,
+         confirmButtonColor: '#3085d6',
+         cancelButtonColor: '#d33',
+         confirmButtonText: 'Sí, eliminar',
+         cancelButtonText: 'Cancelar'
+     }).then((result) => {
+         if (result.isConfirmed) {
+             deleteContent(contentId);
+         }
+     });
+ };
+ 
+ const deleteContent = async (contentId) => {
   try {
-    const response = await getContent();
-    contents.value = response.data;
-  } catch (error) {
-    console.error("Error obteniendo contenido:", error);
-  }
-};
-
-const handleFileUpload = (event) => {
-  file.value = event.target.files[0];
-};
-
-const uploadFile = async () => {
-  if (!file.value || !selectedCourse.value) {
-    Swal.fire('Error', 'Seleccione un curso y un archivo', 'error');
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append('file', file.value);
-  formData.append('courseId', selectedCourse.value); // Agregamos el ID del curso
-
-  try {
-    await uploadContent(formData);
-    Swal.fire('Éxito', 'Archivo subido correctamente', 'success');
-    file.value = null;
-    await fetchContents();
-  } catch (error) {
-    Swal.fire('Error', 'No se pudo subir el archivo', 'error');
-  }
-};
-
-const confirmDelete = (id) => {
-  Swal.fire({
-    title: '¿Seguro que quieres eliminar?',
-    text: 'Esta acción no se puede deshacer',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Sí, eliminar',
-    cancelButtonText: 'Cancelar'
-  }).then(async (result) => {
-    if (result.isConfirmed) {
-      await removeContent(id);
+    // Primero, verificar que contentId es válido
+    if (!contentId) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'ID de contenido no válido'
+      });
+      return;
     }
-  });
-};
 
-const removeContent = async (id) => {
-  try {
-    await deleteContent(id);
-    Swal.fire('Eliminado', 'El contenido ha sido eliminado', 'success');
-    await fetchContents();
+    // Realizar la solicitud de eliminación
+    const response = await api.delete(`/content/${contentId}`);
+
+    // Actualizar la lista de contenidos localmente
+    content.value = content.value.filter(content => content.id !== contentId);
+
+    Swal.fire({
+      title: '¡Eliminado!',
+      text: 'El contenido ha sido eliminado.',
+      icon: 'success',
+      timer: 1500,
+      showConfirmButton: false
+    });
   } catch (error) {
-    Swal.fire('Error', 'No se pudo eliminar', 'error');
+    console.error('Error al eliminar contenido:', error);
+    
+    // Mostrar detalles más específicos del error
+    const errorMessage = error.response?.data?.message || 
+                         error.response?.data || 
+                         error.message || 
+                         'Error desconocido';
+
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: `No se pudo eliminar el contenido: ${errorMessage}`,
+      footer: `Código de estado: ${error.response?.status || 'N/A'}`
+    });
   }
 };
-</script>
-
-<style scoped>
-/* Puedes agregar más estilos aquí si es necesario */
-</style>
+ 
+ onMounted(fetchContent);
+ </script>

@@ -65,28 +65,23 @@ export default defineComponent({
     const showEditModal = ref(false);
     const selectedUser = ref<any>(null);
     const editingUserId = ref<number | null>(null);
-    // Copia local de la lista de usuarios para manipulación reactiva
     const localUsers = ref<User[]>([...props.users]);
     
-    // Importar funciones de alertas
     const { showToast } = success();
     const { showError } = error();
     const { confirmDeletion } = confirmation();
 
-    // Mantener la lista local sincronizada con las props
     watch(() => props.users, (newUsers) => {
       localUsers.value = [...newUsers];
     }, { deep: true });
 
     const openEditModal = (user: User) => {      
-      // Guardar el ID del usuario que estamos editando
       editingUserId.value = user.id;
-      
-      // Mapear el usuario con contraseña vacía y mantener el id
+    
       selectedUser.value = {
         id: user.id,
         username: user.username,
-        password: '', // Contraseña vacía
+        password: '',
         roles: user.roles
       };
       
@@ -94,27 +89,17 @@ export default defineComponent({
     };
 
     const handleDeleteUser = async (userId: number) => {
-      // Mostrar diálogo de confirmación usando la función del composable
       const result = await confirmDeletion();
-      
-      // Si el usuario confirma la eliminación
+
       if (result.isConfirmed) {
         try {
-          // Llamar a la API para eliminar el usuario
           await deleteUser(userId);
-          
-          // Eliminar el usuario de la lista local para actualización visual inmediata
           localUsers.value = localUsers.value.filter(user => user.id !== userId);
-          
-          // Notificar al componente padre que el usuario ha sido eliminado
           emit('user-deleted', userId);
-          
-          // Mostrar notificación de éxito usando el composable
           showToast('¡Usuario eliminado!', 'El usuario ha sido eliminado correctamente.');
         } catch (error) {
           console.error('Error al eliminar el usuario:', error);
           
-          // Mostrar notificación de error usando el composable
           showError('Error', 'No se pudo eliminar el usuario. Por favor, intenta de nuevo.');
         }
       }
@@ -125,16 +110,12 @@ export default defineComponent({
       console.log('Datos enviados:', updatedUser);
       
       try {
-        // Asegurar que el ID del usuario esté incluido
         const userToUpdate = {
           ...updatedUser,
           id: editingUserId.value
         };
-        
-        // Llamada a la API para actualizar el usuario
         const response = await api.put(`/users/update/${userToUpdate.id}`, userToUpdate);
         
-        // Actualizar el usuario en la lista local para actualización visual inmediata
         const index = localUsers.value.findIndex(user => user.id === userToUpdate.id);
         if (index !== -1) {
           localUsers.value[index] = {
@@ -144,19 +125,13 @@ export default defineComponent({
         }
         
         console.log('Respuesta de la API:', response.data);
-        
-        // Notificar al componente padre que el usuario ha sido actualizado
         emit('user-updated', response.data);
-        
-        // Mostrar notificación de éxito usando el composable
         showToast('¡Usuario actualizado!', 'El usuario ha sido actualizado correctamente.');
         
-        // Cerrar el modal
         showEditModal.value = false;
+
       } catch (error) {
         console.error('Error al actualizar el usuario:', error);
-        
-        // Mostrar notificación de error usando el composable
         showError('Error', 'No se pudo actualizar el usuario. Por favor, intenta de nuevo.');
       }
     };

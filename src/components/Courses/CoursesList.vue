@@ -82,18 +82,48 @@ const handleDeleteCourse = async (courseId) => {
 };
 
 const submitEditForm = async (updatedCourse) => {
+  console.log('=== Curso actualizado ===');
+  console.log('Datos enviados:', updatedCourse);
+
   try {
-    const response = await api.put(`/courses/update/${updatedCourse.id}`, updatedCourse);
-    const index = localCourses.value.findIndex(course => course.id === updatedCourse.id);
+    // Asegurar que el ID del curso esté incluido
+    const courseToUpdate = {
+      ...updatedCourse,
+      id: selectedCourse.value.id, // Asegurar que el ID esté presente
+    };
+
+    console.log(`URL: /courses/update/${courseToUpdate.id}`);
+    
+    // Llamada a la API para actualizar el curso
+    const response = await api.put(`/courses/update/${courseToUpdate.id}`, courseToUpdate, {
+      headers: { "Content-Type": "application/json" }
+    });
+
+    // Actualizar el curso en la lista local para reflejar los cambios inmediatamente
+    const index = localCourses.value.findIndex(course => course.id === courseToUpdate.id);
     if (index !== -1) {
-      localCourses.value[index] = response.data;
+      localCourses.value[index] = {
+        ...localCourses.value[index],
+        ...response.data
+      };
     }
+
+    console.log('Respuesta de la API:', response.data);
+
+    // Notificar al componente padre que el curso ha sido actualizado
     emit('course-updated', response.data);
+
+    // Mostrar notificación de éxito usando el composable
     showToast('¡Curso actualizado!', 'El curso ha sido actualizado correctamente.');
+
+    // Cerrar el modal
     showEditModal.value = false;
   } catch (error) {
     console.error('Error al actualizar el curso:', error);
-    showError('Error', 'No se pudo actualizar el curso.');
+    
+    // Mostrar notificación de error usando el composable
+    showError('Error', 'No se pudo actualizar el curso. Por favor, intenta de nuevo.');
   }
 };
+
 </script>
