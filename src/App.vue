@@ -4,7 +4,7 @@ import { RouterLink, RouterView } from 'vue-router'
 
 <template>
   <header>
-    <img alt="Vue logo" class="logo" src="@/assets/pal.svg" width="125" height="125" />
+    <img alt="Vue logo" class="logo" src="@/assets/pal2.svg" width="125" height="125" />
     <div class="wrapper">
       <HelloWorld msg="Sistema PAL" />
       <nav>
