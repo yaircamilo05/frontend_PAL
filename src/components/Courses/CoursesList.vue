@@ -5,16 +5,24 @@
       No hay cursos disponibles.
     </div>
     <ul v-else class="space-y-6">
-      <li v-for="course in localCourses" :key="course.id" class="flex flex-col p-3.5 m-3 bg-[#212121] rounded-md">
+      <li
+        v-for="course in localCourses"
+        :key="course.id"
+        class="flex flex-col p-3.5 m-3 bg-[#212121] rounded-md"
+      >
         <div class="flex justify-between items-center mb-2">
           <h3 class="text-xl font-semibold">{{ course.title }}</h3>
           <div class="flex items-center gap-4">
-            <button @click="openEditModal(course)"
-              class="inline-flex items-center justify-center px-4 py-2 text-blue-500 hover:text-blue-700 border-2 border-blue-500 rounded-md">
+            <button
+              @click="openEditModal(course)"
+              class="inline-flex items-center justify-center px-4 py-2 text-blue-500 hover:text-blue-700 border-2 border-blue-500 rounded-md"
+            >
               Editar
             </button>
-            <button @click="handleDeleteCourse(course.id)"
-              class="inline-flex items-center justify-center px-4 py-2 text-red-500 hover:text-red-700 border-2 border-red-500 rounded-md">
+            <button
+              @click="handleDeleteCourse(course.id)"
+              class="inline-flex items-center justify-center px-4 py-2 text-red-500 hover:text-red-700 border-2 border-red-500 rounded-md"
+            >
               Eliminar
             </button>
           </div>
@@ -30,100 +38,132 @@
 
     <!-- Modal -->
     <Modal v-model:isOpen="showEditModal" title="Editar Curso">
-      <CourseForm v-if="selectedCourse" :course="selectedCourse" :isCreateMode="false" @submit="submitEditForm" />
+      <CourseForm 
+        v-if="selectedCourse" 
+        :course="selectedCourse" 
+        :isCreateMode="false"
+        @submit="submitEditForm"
+      />
     </Modal>
   </div>
 </template>
 
-<script setup>
-import { ref, watch } from 'vue';
+<script lang="ts">
+import { defineComponent, type PropType, ref, watch } from 'vue';
+import type { Course } from '@/models/Course.model';
 import Modal from '@/components/modal.vue';
 import CourseForm from './CoursesForm.vue';
 import api from '@/services/api';
 import { success, error, confirmation } from '../../composables/alerts.ts';
+import type { AxiosError } from 'axios';
 
-const props = defineProps({
-  courses: {
-    type: Array,
-    required: true
-  }
-});
-
-const emit = defineEmits(['delete', 'edit', 'course-updated', 'course-deleted']);
-const showEditModal = ref(false);
-const selectedCourse = ref(null);
-const localCourses = ref([...props.courses]);
-const { showToast } = success();
-const { showError } = error();
-const { confirmDeletion } = confirmation();
-
-watch(() => props.courses, (newCourses) => {
-  localCourses.value = [...newCourses];
-}, { deep: true });
-
-const openEditModal = (course) => {
-  selectedCourse.value = { ...course };
-  showEditModal.value = true;
-};
-
-const handleDeleteCourse = async (courseId) => {
-  const result = await confirmDeletion();
-  if (result.isConfirmed) {
-    try {
-      await api.delete(`/courses/delete/${courseId}`);
-      localCourses.value = localCourses.value.filter(course => course.id !== courseId);
-      emit('course-deleted', courseId);
-      showToast('¡Curso eliminado!', 'El curso ha sido eliminado correctamente.');
-    } catch (error) {
-      console.error('Error al eliminar el curso:', error);
-      showError('Error', 'No se pudo eliminar el curso.');
+export default defineComponent({
+  name: 'CourseList',
+  components: {
+    Modal,
+    CourseForm
+  },
+  props: {
+    courses: {
+      type: Array as PropType<Course[]>,
+      required: true
     }
-  }
-};
+  },
+  emits: ['delete', 'edit', 'course-updated', 'course-deleted'],
+  setup(props, { emit }) {
+    const showEditModal = ref(false);
+    const selectedCourse = ref<any>(null);
+    const editingCourseId = ref<number | null>(null);
+    const localCourses = ref<Course[]>([...props.courses]);
 
-const submitEditForm = async (updatedCourse) => {
-  console.log('=== Curso actualizado ===');
-  console.log('Datos enviados:', updatedCourse);
+    const { showToast } = success();
+    const { showError } = error();
+    const { confirmDeletion } = confirmation();
 
-  try {
-    // Asegurar que el ID del curso esté incluido
-    const courseToUpdate = {
-      ...updatedCourse,
-      id: selectedCourse.value.id, // Asegurar que el ID esté presente
+    watch(() => props.courses, (newCourses) => {
+      localCourses.value = [...newCourses];
+    }, { deep: true });
+
+    const openEditModal = (course: Course) => {
+      editingCourseId.value = course.id;
+
+      selectedCourse.value = {
+        id: course.id,
+        title: course.title,
+        description: course.description,
+        price: course.price,
+        category: course.category,
+        instructor: course.instructor
+      };
+
+      showEditModal.value = true;
     };
 
-    console.log(`URL: /courses/update/${courseToUpdate.id}`);
-    
-    // Llamada a la API para actualizar el curso
-    const response = await api.put(`/courses/update/${courseToUpdate.id}`, courseToUpdate, {
-      headers: { "Content-Type": "application/json" }
-    });
+    const handleDeleteCourse = async (courseId: number) => {
+      const result = await confirmDeletion();
 
-    // Actualizar el curso en la lista local para reflejar los cambios inmediatamente
-    const index = localCourses.value.findIndex(course => course.id === courseToUpdate.id);
-    if (index !== -1) {
-      localCourses.value[index] = {
-        ...localCourses.value[index],
-        ...response.data
-      };
-    }
+      if (result.isConfirmed) {
+        try {
+          await api.delete(`/courses/delete/${courseId}`);
+          localCourses.value = localCourses.value.filter(course => course.id !== courseId);
+          emit('course-deleted', courseId);
+          showToast('¡Curso eliminado!', 'El curso ha sido eliminado correctamente.');
+        } catch (err) {
+          console.error('Error al eliminar el curso:', err);
 
-    console.log('Respuesta de la API:', response.data);
+          const error = err as AxiosError<any>;
+          let errorMessage = 'Error desconocido.';
 
-    // Notificar al componente padre que el curso ha sido actualizado
-    emit('course-updated', response.data);
+          if (error.response?.data) {
+            if (typeof error.response.data === 'string') {
+              errorMessage = error.response.data;
+            } else if ('message' in error.response.data) {
+              errorMessage = error.response.data.message;
+            }
+          } else {
+            errorMessage = error.message;
+          }
 
-    // Mostrar notificación de éxito usando el composable
-    showToast('¡Curso actualizado!', 'El curso ha sido actualizado correctamente.');
+          showError('Error al eliminar', errorMessage);
+        }
+      }
+    };
 
-    // Cerrar el modal
-    showEditModal.value = false;
-  } catch (error) {
-    console.error('Error al actualizar el curso:', error);
-    
-    // Mostrar notificación de error usando el composable
-    showError('Error', 'No se pudo actualizar el curso. Por favor, intenta de nuevo.');
+    const submitEditForm = async (updatedCourse: any) => {
+      try {
+        const courseToUpdate = {
+          ...updatedCourse,
+          id: editingCourseId.value
+        };
+        const response = await api.put(`/courses/update/${courseToUpdate.id}`, courseToUpdate);
+
+        const index = localCourses.value.findIndex(course => course.id === courseToUpdate.id);
+        if (index !== -1) {
+          localCourses.value[index] = {
+            ...localCourses.value[index],
+            ...response.data
+          };
+        }
+
+        emit('course-updated', response.data);
+        showToast('¡Curso actualizado!', 'El curso ha sido actualizado correctamente.');
+
+        showEditModal.value = false;
+
+      } catch (error) {
+        console.error('Error al actualizar el curso:', error);
+        showError('Error', 'No se pudo actualizar el curso. Por favor, intenta de nuevo.');
+      }
+    };
+
+    return {
+      showEditModal,
+      selectedCourse,
+      localCourses,
+      openEditModal,
+      handleDeleteCourse,
+      submitEditForm
+    };
   }
-};
-
+});
 </script>
