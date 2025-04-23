@@ -10,6 +10,7 @@ export interface CourseCreate{
 }
 
 export interface Course{
+    id: number;
     title: String;
     description: String;
     price: number; 

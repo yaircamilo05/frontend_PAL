@@ -1,5 +1,5 @@
 <template>
-  <div class="contenedor_general">
+  <div class="">
     <h1 class="text-3xl font-bold mb-10">Gestión de Cursos</h1>
 
     <CoursesManagement v-slot="{ instructors, categories }">
