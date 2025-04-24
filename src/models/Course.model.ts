@@ -1,19 +1,25 @@
 import type { Category } from "./Category.model";
 import type { User } from "./User.model";
 
-export interface CourseCreate{
-    title: String;
-    description: String;
-    price: number; 
-    categoryId: number;
-    instructorId: number;
+/**
+ * Modelo para la creación de cursos.
+ */
+export interface CourseCreate {
+  title: string;
+  description: string;
+  price: number; 
+  categoryId: number;
+  instructorId: number;
 }
 
-export interface Course{
-    id: number;
-    title: String;
-    description: String;
-    price: number; 
-    category: Category;
-    instructor: User;
+/**
+ * Modelo completo de un curso (para edición, visualización, etc.).
+ */
+export interface Course {
+  id: number;
+  title: string;
+  description: string;
+  price: number; 
+  category: Category;
+  instructor: User;
 }

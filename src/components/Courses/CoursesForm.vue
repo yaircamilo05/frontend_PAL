@@ -1,5 +1,6 @@
 <template>
   <form @submit.prevent="handleSubmit" class="space-y-6">
+    <!-- Título -->
     <div class="flex flex-col">
       <label for="courseName" class="block text-sm font-medium">Nombre del Curso</label>
       <input v-model="formData.title" type="text" id="courseName"
@@ -7,6 +8,7 @@
         placeholder="Ingrese el nombre del curso" required />
     </div>
 
+    <!-- Descripción -->
     <div class="flex flex-col pt-3">
       <label for="description" class="block text-sm font-medium">Descripción</label>
       <textarea v-model="formData.description" id="description" rows="4"
@@ -14,6 +16,7 @@
         placeholder="Ingrese la descripción del curso" required></textarea>
     </div>
 
+    <!-- Precio -->
     <div class="flex flex-col pt-3">
       <label for="price" class="block text-sm font-medium">Precio</label>
       <div class="relative mt-2 max-w-2xl">
@@ -24,6 +27,7 @@
       </div>
     </div>
 
+    <!-- Categoría -->
     <div class="flex flex-col pt-3">
       <label for="categories" class="block text-sm font-medium">Categorías</label>
       <select v-model="formData.categoryId" id="categories"
@@ -36,6 +40,7 @@
       </select>
     </div>
 
+    <!-- Instructor -->
     <div class="flex flex-col pt-3">
       <label for="instructors" class="block text-sm font-medium">Instructores</label>
       <select v-model="formData.instructorId" id="instructors"
@@ -46,15 +51,15 @@
           {{ instructor.username }}
         </option>
       </select>
-      <p v-if="instructors.length === 0" class="text-sm text-red-500 mt-1">No se encontraron instructores disponibles.
-      </p>
+      <p v-if="instructors.length === 0" class="text-sm text-red-500 mt-1">No se encontraron instructores disponibles.</p>
     </div>
 
+    <!-- Botón -->
     <div class="flex justify-start pt-3">
       <button type="submit"
         class="inline-flex items-center justify-center px-6 py-3 bg-vue-green text-green-500 hover:border-green-300 hover:text-green-300 border-green-500 rounded-md hover:bg-vue-green-dark focus:outline-none focus:ring-2 focus:ring-vue-green border-2 border-vue-green"
         :disabled="isSubmitting">
-        {{ isSubmitting ? 'Creando...' : 'Crear Curso' }}
+        {{ isCreateMode ? (isSubmitting ? 'Creando...' : 'Crear Curso') : (isSubmitting ? 'Guardando...' : 'Guardar Cambios') }}
       </button>
     </div>
   </form>
@@ -63,7 +68,7 @@
 <script lang="ts">
 import { defineComponent, type PropType } from 'vue';
 import api from '@/services/api';
-import type { CourseCreate } from '@/models/Course.model';
+import type { Course } from '@/models/Course.model';
 import type { Instructor } from '@/models/User.model';
 import type { Category } from '@/models/Category.model';
 
@@ -71,8 +76,15 @@ export default defineComponent({
   name: 'CourseForm',
   props: {
     course: {
-      type: Object as PropType<CourseCreate>,
-      default: () => ({ title: '', description: '', price: 0, categoryId: 0, instructorId: 0 }),
+      type: Object as PropType<Course>,
+      default: () => ({
+        id: 0,
+        title: '',
+        description: '',
+        price: 0,
+        category: { id: 0, name: '' },
+        instructor: { id: 0, username: '' }
+      }),
     },
     isCreateMode: {
       type: Boolean,
@@ -84,12 +96,10 @@ export default defineComponent({
     return {
       formData: {
         title: this.course.title || '',
-        description: typeof this.course.description === 'string'
-          ? this.course.description
-          : String(this.course.description || ''),
+        description: this.course.description || '',
         price: this.course.price || 0,
-        categoryId: this.course.categoryId || 0,
-        instructorId: this.course.instructorId || 0
+        categoryId: this.course.category?.id || 0,
+        instructorId: this.course.instructor?.id || 0
       },
       instructors: [] as Instructor[],
       categories: [] as Category[],
@@ -105,31 +115,31 @@ export default defineComponent({
       try {
         const response = await api.get('/categories/all');
         this.categories = response.data;
-        console.log('Categorías cargadas:', this.categories);
       } catch (error) {
         console.error('Error al obtener categorías:', error);
       }
     },
-
     async fetchInstructors() {
       try {
         const response = await api.get('/users/by-role', {
           params: { role: 'INSTRUCTOR' }
         });
         this.instructors = response.data;
-        console.log('Instructores cargados:', this.instructors);
       } catch (error) {
         console.error('Error al obtener instructores:', error);
       }
     },
-
     async handleSubmit() {
       this.isSubmitting = true;
       try {
-        await api.post('/courses/create', this.formData);
+        if (this.isCreateMode) {
+          await api.post('/courses/create', this.formData);
+        } else {
+          await api.put(`/courses/update/${this.course.id}`, this.formData);
+        }
         this.$emit('submit', this.formData);
       } catch (error) {
-        console.error('Error al crear curso:', error);
+        console.error('Error al enviar formulario:', error);
       } finally {
         this.isSubmitting = false;
       }
@@ -137,9 +147,3 @@ export default defineComponent({
   }
 });
 </script>
-
-<style scoped>
-.close {
-  cursor: pointer;
-}
-</style>
