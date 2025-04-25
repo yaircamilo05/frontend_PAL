@@ -131,19 +131,11 @@ export default defineComponent({
     },
     async handleSubmit() {
       this.isSubmitting = true;
-      try {
-        if (this.isCreateMode) {
-          await api.post('/courses/create', this.formData);
-        } else {
-          await api.put(`/courses/update/${this.course.id}`, this.formData);
-        }
-        this.$emit('submit', this.formData);
-      } catch (error) {
-        console.error('Error al enviar formulario:', error);
-      } finally {
-        this.isSubmitting = false;
-      }
-    }
+      // Solo emitimos los datos al padre y dejamos que él llame a la API
+      this.$emit('submit', { ...this.formData });
+      this.isSubmitting = false;
+    },
   }
-});
+}
+);
 </script>
