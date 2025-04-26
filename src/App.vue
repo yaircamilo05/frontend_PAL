@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterLink, RouterView, useRoute } from 'vue-router'
+
+const route = useRoute()
 </script>
 
 <template>
-  <header>
+  <header v-if="route.path !== '/login'">
     <img alt="Vue logo" class="logo" src="@/assets/pal2.svg" width="125" height="125" />
     <div class="wrapper">
       <HelloWorld msg="Sistema PAL" />
