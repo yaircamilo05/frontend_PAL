@@ -10,8 +10,6 @@
     <div class="contenedor_interno">
       <UserList 
         :users="users" 
-        @edit="startEdit" 
-        @delete="confirmDeleteUser" 
       />
     </div>
   </div>
@@ -25,13 +23,13 @@ import UserForm from '@/components/Users/UserForm.vue';
 import UserList from '@/components/Users/UserList.vue';
 
 const users = ref([]);
-const newUser = ref({ username: '', password: '' });
 
 const fetchUsers = async () => {
   try {
     const response = await api.get('/users/all');
     users.value = response.data;
   } catch (error) {
+    console.error('Error fetching users:', error);
     Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudieron cargar los usuarios.' });
   }
 };
@@ -42,32 +40,13 @@ const createNewUser = async (userData) => {
     users.value.push(response.data);
     Swal.fire({ icon: 'success', title: '¡Éxito!', text: 'Usuario creado correctamente.', timer: 1500, showConfirmButton: false });
   } catch (error) {
+    console.error('Error creating user:', error);
     Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo crear el usuario.' });
+    throw error;
   }
 };
 
-const startEdit = (user) => {
-  // Implementar la lógica para comenzar a editar un usuario
-  console.log('Editar usuario:', user);
-  // Por ejemplo, podrías abrir un modal o cambiar a un modo de edición
-};
 
-const confirmDeleteUser = (userId) => {
-  Swal.fire({
-    title: '¿Estás seguro?',
-    text: 'Esta acción no se puede revertir',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#3085d6',
-    cancelButtonColor: '#d33',
-    confirmButtonText: 'Sí, eliminar',
-    cancelButtonText: 'Cancelar'
-  }).then((result) => {
-    if (result.isConfirmed) {
-      deleteUser(userId);
-    }
-  });
-};
 
 const deleteUser = async (userId) => {
   try {
@@ -81,6 +60,7 @@ const deleteUser = async (userId) => {
       showConfirmButton: false
     });
   } catch (error) {
+    console.error('Error deleting user:', error);
     Swal.fire({
       icon: 'error',
       title: 'Error',
