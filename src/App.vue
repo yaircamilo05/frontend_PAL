@@ -1,7 +1,28 @@
 <script setup lang="ts">
 import { RouterLink, RouterView, useRoute } from 'vue-router'
+import { ref, onMounted, watch } from 'vue'
 
 const route = useRoute()
+const userRole = ref<string | null>(null)
+
+const updateUserRole = () => {
+  userRole.value = sessionStorage.getItem('userInfo')
+    ? JSON.parse(sessionStorage.getItem('userInfo')!).roles[0]
+    : null
+  console.log('User role updated:', userRole.value)
+}
+
+onMounted(() => {
+  updateUserRole()
+  window.addEventListener('storage', updateUserRole)
+})
+
+watch(
+  () => route.path,
+  () => {
+    updateUserRole()
+  }
+)
 </script>
 
 <template>
@@ -9,11 +30,15 @@ const route = useRoute()
     <img alt="Vue logo" class="logo" src="@/assets/pal2.svg" width="125" height="125" />
     <div class="wrapper">
       <HelloWorld msg="Sistema PAL" />
-      <nav>
-        <RouterLink to="/categories">Categorías</RouterLink>
-        <RouterLink to="/content">Contenido</RouterLink>
-        <RouterLink to="/courses">Cursos</RouterLink>
-        <RouterLink to="/users">Usuarios</RouterLink>
+      <nav v-if="userRole === 'ADMIN'" aria-label="Admin Navigation">
+        <RouterLink to="/admin/categories">Categorías</RouterLink>
+        <RouterLink to="/admin/content">Contenido</RouterLink>
+        <RouterLink to="/admin/courses">Cursos</RouterLink>
+        <RouterLink to="/admin/users">Usuarios</RouterLink>
+      </nav>
+      <nav v-if="userRole === 'STUDENT'" aria-label="Student Navigation">
+        <RouterLink to="/student/courses">Mis Cursos</RouterLink>
+        <RouterLink to="/student/profile">Mi Perfil</RouterLink>
       </nav>
     </div>
   </header>
