@@ -102,4 +102,11 @@ export const getUserByRoleName = (roleName: string) => api.get<User[]>(`/users/b
 export const getRoles = () => api.get<Role[]>("/roles/all");
 
 
+//Enroll
+
+export const enrollCourse = (courseId: number, userId: number) => {
+  return api.post('/enrollments/register', { userId, courseId });
+}
+
+
 export default api;

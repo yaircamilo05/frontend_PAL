@@ -55,7 +55,7 @@ const router = createRouter({
     {
       path: '/student/home',
       name: 'student-home',
-      component: () => import('@/views/StudentHomeView.vue'),
+      component: HomeView,
     },
 
     {

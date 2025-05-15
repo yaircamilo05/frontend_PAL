@@ -36,9 +36,10 @@ watch(
         <RouterLink to="/admin/courses">Cursos</RouterLink>
         <RouterLink to="/admin/users">Usuarios</RouterLink>
       </nav>
-      <nav v-if="userRole === 'STUDENT'" aria-label="Student Navigation">
-        <RouterLink to="/student/courses">Mis Cursos</RouterLink>
+      <nav v-if="userRole === 'student'" aria-label="Student Navigation">
+        <RouterLink to="/student/courses">Explorar Cursos</RouterLink>
         <RouterLink to="/student/profile">Mi Perfil</RouterLink>
+        <RouterLink to="/student/enrolled">Mis Cursos</RouterLink>
       </nav>
     </div>
   </header>

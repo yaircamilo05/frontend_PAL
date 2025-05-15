@@ -2,7 +2,7 @@
   <div class="contenedor_general">
     <h1 class="text-3xl font-bold mb-8">Explora Cursos</h1>
     <SearchCourses @search="handleSearch" />
-    <CoursesStudentList :courses="filteredCourses" />
+    <CoursesStudentList :courses="filteredCourses" @enroll="handleEnroll" />
   </div>
 </template>
 
@@ -10,11 +10,14 @@
 import { ref, onMounted } from 'vue';
 import SearchCourses from '@/components/Courses/SearchCourses.vue';
 import CoursesStudentList from '@/components/Courses/CoursesStudentList.vue';
-import api from '@/services/api';
+import api, { enrollCourse } from '@/services/api';
 import type { Course } from '@/models/Course.model';
+import { success, error } from '@/composables/alerts';
 
 const allCourses = ref<Course[]>([]);
 const filteredCourses = ref<Course[]>([]);
+const { showToast } = success();
+const { showError } = error();
 
 onMounted(async () => {
   try {
@@ -45,5 +48,27 @@ function handleSearch(filters: { keyword: string; maxPrice: string; categoryId: 
     result = result.filter(c => c.category && String(c.category.id) === String(filters.categoryId));
   }
   filteredCourses.value = result;
+}
+
+async function handleEnroll(course: Course) {
+  try {
+    const userInfo = JSON.parse(sessionStorage.getItem('userInfo') || '{}');
+    const userId = userInfo.id;
+    if (!userId) throw new Error('No se encontró el usuario autenticado.');
+    await enrollCourse(course.id, userId);
+    showToast('¡Inscripción exitosa!', 'Te has inscrito correctamente en el curso.');
+  } catch (err: any) {
+    let errorMessage = 'Error desconocido.';
+    if (err.response?.data) {
+      if (typeof err.response.data === 'string') {
+        errorMessage = err.response.data;
+      } else if ('message' in err.response.data) {
+        errorMessage = err.response.data.message;
+      }
+    } else {
+      errorMessage = err.message;
+    }
+    showError('Error al inscribirse', errorMessage);
+  }
 }
 </script>

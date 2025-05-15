@@ -4,7 +4,7 @@
     <p>Aquí podrás ver tus cursos y contenido asignado.</p>
   </div>
   <nav>
-        <RouterLink to="/student/courses">Mis Cursos</RouterLink>
+        <RouterLink to="/student/courses">Mis pene</RouterLink>
         <RouterLink to="/student/profile">Mi Perfil</RouterLink>
       </nav>
 </template>
