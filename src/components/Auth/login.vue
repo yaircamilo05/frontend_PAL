@@ -81,7 +81,7 @@ export default {
         } else if (userInfo.roles.includes('INSTRUCTOR')) {
           this.$router.push('/instructor/courses');
         } else {
-          this.$router.push('/student/courses');
+          this.$router.push('/student/home');
         }
 
         alert('Inicio de sesión exitoso');

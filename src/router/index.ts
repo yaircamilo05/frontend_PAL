@@ -3,7 +3,6 @@ import CategoriesView from '../views/CategoriesView.vue';
 import CoursesView from '../views/CoursesView.vue';
 import UsersView from '../views/UsersView.vue';
 import ContentView from '@/views/ContentView.vue';
-import StudentView from '../views/StudentView.vue';
 import HomeView from '../views/HomeView.vue';
 
 const router = createRouter({
@@ -54,10 +53,16 @@ const router = createRouter({
       component: HomeView,
     },
     {
+      path: '/student/home',
+      name: 'student-home',
+      component: () => import('@/views/StudentHomeView.vue'),
+    },
+
+    {
       path: '/student/courses',
       name: 'student-courses',
-      component: StudentView,
-    },
+      component: () => import('@/views/CoursesStudentView.vue'),
+    }
   ],
 });
 

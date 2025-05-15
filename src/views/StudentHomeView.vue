@@ -3,14 +3,24 @@
     <h1>Bienvenido Estudiante</h1>
     <p>Aquí podrás ver tus cursos y contenido asignado.</p>
   </div>
+  <nav>
+        <RouterLink to="/student/courses">Mis Cursos</RouterLink>
+        <RouterLink to="/student/profile">Mi Perfil</RouterLink>
+      </nav>
 </template>
 
 <script lang="ts">
+
+
+
 import { defineComponent } from 'vue';
 
 export default defineComponent({
-  name: 'StudentView',
+  name: 'StudentHomeView',
 });
+
+
+
 </script>
 
 <style scoped>
