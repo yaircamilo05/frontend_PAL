@@ -108,5 +108,13 @@ export const enrollCourse = (courseId: number, userId: number) => {
   return api.post('/enrollments/register', { userId, courseId });
 }
 
+export const getMyEnrollments = (userId: number) => {
+  return api.get(`/enrollments/my-courses/${userId}`);
+}
+
+// Procesar pago
+export const processPayment = (paymentId: number) => {
+  return api.post(`/payments/process/${paymentId}`);
+}
 
 export default api;

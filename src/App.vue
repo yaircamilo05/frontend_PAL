@@ -39,7 +39,7 @@ watch(
       <nav v-if="userRole === 'student'" aria-label="Student Navigation">
         <RouterLink to="/student/courses">Explorar Cursos</RouterLink>
         <RouterLink to="/student/profile">Mi Perfil</RouterLink>
-        <RouterLink to="/student/enrolled">Mis Cursos</RouterLink>
+        <RouterLink to="/student/my-enrollments">Mis Cursos</RouterLink>
       </nav>
     </div>
   </header>

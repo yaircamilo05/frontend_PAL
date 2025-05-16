@@ -4,6 +4,8 @@ import CoursesView from '../views/CoursesView.vue';
 import UsersView from '../views/UsersView.vue';
 import ContentView from '@/views/ContentView.vue';
 import HomeView from '../views/HomeView.vue';
+import StudentEnrollmentView from '@/views/StudentEnrollmentView.vue';
+import CoursesStudentView from '@/views/CoursesStudentView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -61,7 +63,12 @@ const router = createRouter({
     {
       path: '/student/courses',
       name: 'student-courses',
-      component: () => import('@/views/CoursesStudentView.vue'),
+      component: CoursesStudentView,
+    },
+    {
+      path: '/student/my-enrollments',
+      name: 'student-my-enrollments',
+      component: StudentEnrollmentView
     }
   ],
 });
