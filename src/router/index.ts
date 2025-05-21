@@ -76,7 +76,7 @@ const router = createRouter({
       component: CourseContentView
     },
     {
-      path: '/student/exam/:examId/:examName',
+      path: '/student/exam/:examId',
       name: 'student-exam',
       component: ExamView
     }

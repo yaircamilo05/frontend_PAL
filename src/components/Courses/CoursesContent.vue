@@ -122,6 +122,7 @@ onMounted(async () => {
 });
 
 function handleStartExam(exam: ExamGetBasic) {
+  console.log('Iniciando examen:', exam.title);
   emit('start-exam', { courseId: props.courseId, examId: exam.id, examTitle: exam.title });
   console.log('Iniciando examen:', exam.title, 'con ID:', exam.id);
   
