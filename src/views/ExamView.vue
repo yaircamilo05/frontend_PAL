@@ -12,7 +12,7 @@
     <div v-else-if="viewMode === 'exam'" class="w-full">
       <ExamTaker 
         :examData="examData"
-        @finish="handleExamFinish"
+        @submit="handleExamSubmit"
         @cancel="goBack"
       />
     </div>
@@ -21,7 +21,10 @@
       <h1 class="text-3xl font-bold mb-4">¡Examen completado!</h1>
       <p class="text-xl text-gray-300 mb-8">Tu examen ha sido enviado correctamente.</p>
       <div class="bg-[#212121] max-w-md mx-auto p-6 rounded-lg mb-8">
-        <p class="mb-4">Recibirás los resultados una vez que el examen sea calificado.</p>
+        <p v-if="examResult" class="mb-4">
+          Tu puntuación: <span class="font-bold text-vue-green">{{ examResult.score }}</span>
+        </p>
+        <p v-else class="mb-4">Recibirás los resultados una vez que el examen sea calificado.</p>
         <p class="text-vue-green">Gracias por completar el examen.</p>
       </div>
       <button 
@@ -31,6 +34,16 @@
         Volver al curso
       </button>
     </div>
+    
+    <!-- Loader para mostrar mientras se envían las respuestas -->
+    <div v-if="isSubmitting" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-[#212121] p-6 rounded-lg shadow-lg">
+        <div class="flex items-center space-x-4">
+          <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
+          <p class="text-white">Enviando respuestas...</p>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -39,6 +52,7 @@ import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import ExamStart from '@/components/Exams/ExamStart.vue';
 import ExamTaker from '@/components/Exams/ExamTaker.vue';
+import { submitExamAnswers } from '@/services/api'; // Importa la función de API que debes crear
 import { success, error } from '@/composables/alerts';
 
 const route = useRoute();
@@ -48,11 +62,13 @@ const { showError } = error();
 
 // Modo de visualización: 'start' | 'exam' | 'finish'
 const viewMode = ref<'start' | 'exam' | 'finish'>('start');
+const isSubmitting = ref(false);
 
 // Datos del examen
 const examId = ref<number>(parseInt(route.params.examId as string, 10));
 const examName = ref<string>(route.params.examName as string || 'Examen');
 const examData = ref<any>(null);
+const examResult = ref<any>(null);
 
 // Obtener el ID del usuario autenticado
 const userId = ref<number>(0);
@@ -90,9 +106,30 @@ function handleExamStart(data: any) {
   viewMode.value = 'exam';
 }
 
-// Manejar finalización del examen
-function handleExamFinish() {
-  viewMode.value = 'finish';
+// Manejar envío de respuestas
+async function handleExamSubmit(data: { answers: any[], examId: number, userId: number }) {
+  console.log('Submitting exam answers:', data);
+  
+  isSubmitting.value = true;
+  
+  try {
+    // Preparar los datos para la API en el formato requerido
+    const submission = {
+      answers: data.answers
+    };
+    
+    // Llamar a la API para enviar las respuestas
+    const result = await submitExamAnswers(data.examId, data.userId, submission);
+    
+    examResult.value = result;
+    showToast('Éxito', 'Tu examen ha sido enviado correctamente');
+    viewMode.value = 'finish';
+  } catch (e: any) {
+    console.error('Error al enviar las respuestas:', e);
+    showError('Error', e.message || 'No se pudieron enviar las respuestas. Inténtalo de nuevo.');
+  } finally {
+    isSubmitting.value = false;
+  }
 }
 
 // Volver a la página anterior
@@ -100,3 +137,9 @@ function goBack() {
   router.push('/student/my-enrollments');
 }
 </script>
+
+<style scoped>
+.text-vue-green {
+  color: #42b883;
+}
+</style>

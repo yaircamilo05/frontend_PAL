@@ -176,4 +176,8 @@ export const getExamResults = (examId: number, userId: number) => {
   return api.get(`/exams/results/${examId}?userId=${userId}`);
 }
 
+export const submitExamAnswers = (examId: number, userId: number, answers: any) => {
+  return api.post(`/exams/submit/${examId}?userId=${userId}`, answers);
+}
+
 export default api;
