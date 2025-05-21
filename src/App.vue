@@ -25,11 +25,10 @@ watch(
 )
 </script>
 
-<template>
-  <header v-if="route.path !== '/login'">
+<template>  <header v-if="route.path !== '/login'">
     <img alt="Vue logo" class="logo" src="@/assets/pal2.svg" width="125" height="125" />
     <div class="wrapper">
-      <HelloWorld msg="Sistema PAL" />
+      <h1 class="text-2xl font-bold">Sistema PAL</h1>
       <nav v-if="userRole === 'ADMIN'" aria-label="Admin Navigation">
         <RouterLink to="/admin/categories">Categorías</RouterLink>
         <RouterLink to="/admin/content">Contenido</RouterLink>

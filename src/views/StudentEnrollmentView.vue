@@ -11,11 +11,13 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import EnrollmentList from '@/components/Enrollments/EnrollmentList.vue';
 import { getMyEnrollments, processPayment } from '@/services/api';
 import { success, error } from '@/composables/alerts';
 import type { Enrollment } from '@/models/Enrollment.model';
 
+const router = useRouter();
 const enrollments = ref<Enrollment[]>([]);
 const { showToast } = success();
 const { showError } = error();
@@ -57,6 +59,18 @@ function handlePay(enrollment: any) {
 }
 
 function handleEnter(enrollment: any) {
-  showToast('Entrando al curso', `Entrando a: ${enrollment.course?.title || 'Curso'}`);
+  console.log('Enrollment recibido en handleEnter:', enrollment);
+  
+  // Verificar si el ID existe y es un número válido
+  const courseId = enrollment.courseId;
+  console.log('ID del curso:', courseId);
+  
+  if (!courseId || isNaN(Number(courseId))) {
+    showError('Error', 'ID de curso inválido');
+    return;
+  }
+  
+  showToast('Entrando al curso', `Entrando a: ${enrollment.courseName || 'Curso'}`);
+  router.push(`/student/course/${courseId}`);
 }
 </script>
