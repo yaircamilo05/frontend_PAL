@@ -79,6 +79,11 @@ const router = createRouter({
       path: '/student/exam/:examId',
       name: 'student-exam',
       component: ExamView
+    },
+    {
+      path: '/student/completed-exams/:courseId/:userId',
+      name: 'student-completed-exams',
+      component: () => import('@/components/Exams/ExamResulList.vue'),
     }
   ],
 });

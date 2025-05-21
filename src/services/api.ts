@@ -180,4 +180,9 @@ export const submitExamAnswers = (examId: number, userId: number, answers: any) 
   return api.post(`/exams/submit/${examId}?userId=${userId}`, answers);
 }
 
+export const getExamResultsByUser = (examId: number, userId: number) => {
+  return api.get(`/exams/results/${examId}/all?userId=${userId}`);
+}
+
+
 export default api;

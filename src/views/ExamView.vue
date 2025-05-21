@@ -22,7 +22,7 @@
       <p class="text-xl text-gray-300 mb-8">Tu examen ha sido enviado correctamente.</p>
       <div class="bg-[#212121] max-w-md mx-auto p-6 rounded-lg mb-8">
         <p v-if="examResult" class="mb-4">
-          Tu puntuación: <span class="font-bold text-vue-green">{{ examResult.score }}</span>
+          Tu puntuación: <span class="font-bold text-vue-green">{{ examResult.score }} / {{ examResult.maxScore }}</span>
         </p>
         <p v-else class="mb-4">Recibirás los resultados una vez que el examen sea calificado.</p>
         <p class="text-vue-green">Gracias por completar el examen.</p>
@@ -36,13 +36,22 @@
     </div>
     
     <!-- Loader para mostrar mientras se envían las respuestas -->
-    <div v-if="isSubmitting" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-[#212121] p-6 rounded-lg shadow-lg">
-        <div class="flex items-center space-x-4">
-          <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
-          <p class="text-white">Enviando respuestas...</p>
-        </div>
+    <div v-else-if="viewMode === 'finish'" class="text-center py-10">
+      <h1 class="text-3xl font-bold mb-4">¡Examen completado!</h1>
+      <p class="text-xl text-gray-300 mb-8">Tu examen ha sido enviado correctamente.</p>
+      <div class="bg-[#212121] max-w-md mx-auto p-6 rounded-lg mb-8">
+        <p v-if="examResult" class="mb-4">
+          Tu puntuación: 
+        </p>
+        <p v-else class="mb-4">Recibirás los resultados una vez que el examen sea calificado.</p>
+        <p class="text-vue-green">Gracias por completar el examen.</p>
       </div>
+      <button 
+        @click="goBack" 
+        class="py-3 px-6 bg-slate-700 hover:bg-slate-800 text-white rounded"
+      >
+        Volver al curso
+      </button>
     </div>
   </div>
 </template>
@@ -121,7 +130,9 @@ async function handleExamSubmit(data: { answers: any[], examId: number, userId: 
     // Llamar a la API para enviar las respuestas
     const result = await submitExamAnswers(data.examId, data.userId, submission);
     
-    examResult.value = result;
+    // Guardar el resultado completo
+    examResult.value = result.data || result;
+    console.log('Exam submission result:', examResult.value);
     showToast('Éxito', 'Tu examen ha sido enviado correctamente');
     viewMode.value = 'finish';
   } catch (e: any) {

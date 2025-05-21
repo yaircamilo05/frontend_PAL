@@ -30,7 +30,7 @@
       </div>
 
       
-      <div class="bg-[#212121] p-4 rounded-md">
+      <div class="bg-[#212121] p-4 rounded-md mb-6">
         <h2 class="text-xl font-semibold mb-4">Material del curso</h2>
         <div v-if="courseDetails.exams && courseDetails.exams.length > 0">
           <h3 class="text-lg font-semibold mb-2">Exámenes disponibles</h3>
@@ -55,6 +55,25 @@
         <div v-else class="text-center text-gray-400 py-4">
           <p>No hay exámenes disponibles para este curso.</p>
         </div>
+      </div>
+
+      <!-- Nuevo componente para exámenes realizados -->
+      <div class="bg-[#212121] p-4 rounded-md">
+        <h2 class="text-xl font-semibold mb-4">Mis evaluaciones</h2>
+        <div class="text-center mb-4">
+          <button 
+            @click="navigateToCompletedExams" 
+            class="py-2 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded transition-colors duration-200 flex items-center mx-auto"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+            Ver exámenes realizados
+          </button>
+        </div>
+        <p class="text-gray-400 text-center text-sm">
+          Revisa tus exámenes anteriores y consulta tus calificaciones
+        </p>
       </div>
     </div>
   </div>
@@ -138,6 +157,20 @@ function handleStartExam(exam: ExamGetBasic) {
   // Navegar a la ruta del examen
   window.location.href = `/student/exam/${exam.id}?userId=${userId}&returnTo=/student/course/${props.courseId}`;
 }
+
+function navigateToCompletedExams() {
+  // Obtenemos el ID del usuario desde el sessionStorage
+  const userInfo = JSON.parse(sessionStorage.getItem('userInfo') || '{}');
+  const userId = userInfo.id;
+  
+  if (!userId) {
+    showError('Error', 'Necesitas iniciar sesión para ver tus exámenes realizados.');
+    return;
+  }
+  
+  // Navegar a la página de exámenes completados
+  window.location.href = `/student/completed-exams/${props.courseId}/${userId}`;
+}
 </script>
 
 <style scoped>
@@ -148,5 +181,21 @@ function handleStartExam(exam: ExamGetBasic) {
 
 pre {
   max-height: 200px;
+}
+
+.bg-vue-green {
+  background-color: #42b883;
+}
+
+button {
+  transition: transform 0.1s ease-in-out;
+}
+
+button:hover {
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(0);
 }
 </style>
