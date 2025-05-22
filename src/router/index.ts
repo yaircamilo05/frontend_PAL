@@ -92,7 +92,12 @@ const router = createRouter({
       name: "Certificates",
       component: () => import("@/views/CertificatesView.vue"),
     },
-  ],
+    {
+    path: '/admin/reportes-progreso',
+    name: 'ReportesProgreso',
+    component: () => import("@/views/StudentProgressReportView.vue"),
+    },
+  ], 
 });
 
 router.beforeEach((to, from, next) => {
