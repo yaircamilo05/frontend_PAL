@@ -1,96 +1,103 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import CategoriesView from '../views/CategoriesView.vue';
-import CoursesView from '../views/CoursesView.vue';
-import UsersView from '../views/UsersView.vue';
-import ContentView from '@/views/ContentView.vue';
-import HomeView from '../views/HomeView.vue';
-import StudentEnrollmentView from '@/views/StudentEnrollmentView.vue';
-import CoursesStudentView from '@/views/CoursesStudentView.vue';
-import CourseContentView from '@/views/CourseContentView.vue';
-import ExamView from '@/views/ExamView.vue';
+import { createRouter, createWebHistory } from "vue-router";
+import CategoriesView from "../views/CategoriesView.vue";
+import CoursesView from "../views/CoursesView.vue";
+import UsersView from "../views/UsersView.vue";
+import ContentView from "@/views/ContentView.vue";
+import HomeView from "../views/HomeView.vue";
+import StudentEnrollmentView from "@/views/StudentEnrollmentView.vue";
+import CoursesStudentView from "@/views/CoursesStudentView.vue";
+import CourseContentView from "@/views/CourseContentView.vue";
+import ExamView from "@/views/ExamView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/admin/categories',
-      name: 'categories',
+      path: "/admin/categories",
+      name: "categories",
       component: CategoriesView,
       meta: { requiresAdmin: true },
     },
     {
-      path: '/admin/content',
-      name: 'content',
+      path: "/admin/content",
+      name: "content",
       component: ContentView,
       meta: { requiresAdmin: true },
     },
     {
-      path: '/admin/courses',
-      name: 'courses',
+      path: "/admin/courses",
+      name: "courses",
       component: CoursesView,
       meta: { requiresAdmin: true },
     },
     {
-      path: '/admin/users',
-      name: 'users',
+      path: "/admin/users",
+      name: "users",
       component: UsersView,
       meta: { requiresAdmin: true },
     },
     {
-      path: '/login',
-      name: 'login',
-      component: () => import('@/components/Auth/login.vue'),
+      path: "/login",
+      name: "login",
+      component: () => import("@/components/Auth/login.vue"),
     },
     {
-      path: '/',
-      redirect: '/login',
+      path: "/",
+      redirect: "/login",
     },
     {
-      path: '/admin/dashboard',
-      name: 'admin-dashboard',
+      path: "/admin/dashboard",
+      name: "admin-dashboard",
       component: HomeView,
       meta: { requiresAdmin: true },
     },
     {
-      path: '/instructor/courses',
-      name: 'instructor-courses',
+      path: "/instructor/courses",
+      name: "instructor-courses",
       component: HomeView,
     },
     {
-      path: '/student/home',
-      name: 'student-home',
+      path: "/student/home",
+      name: "student-home",
       component: HomeView,
     },
 
     {
-      path: '/student/courses',
-      name: 'student-courses',
+      path: "/student/courses",
+      name: "student-courses",
       component: CoursesStudentView,
-    },    {
-      path: '/student/my-enrollments',
-      name: 'student-my-enrollments',
-      component: StudentEnrollmentView
-    },    {
-      path: '/student/course/:id',
-      name: 'student-course-content',
-      component: CourseContentView
     },
     {
-      path: '/student/exam/:examId',
-      name: 'student-exam',
-      component: ExamView
+      path: "/student/my-enrollments",
+      name: "student-my-enrollments",
+      component: StudentEnrollmentView,
     },
     {
-      path: '/student/completed-exams/:courseId/:userId',
-      name: 'student-completed-exams',
-      component: () => import('@/components/Exams/ExamResulList.vue'),
-    }
+      path: "/student/course/:id",
+      name: "student-course-content",
+      component: CourseContentView,
+    },
+    {
+      path: "/student/exam/:examId",
+      name: "student-exam",
+      component: ExamView,
+    },
+    {
+      path: "/student/completed-exams/:courseId/:userId",
+      name: "student-completed-exams",
+      component: () => import("@/components/Exams/ExamResulList.vue"),
+    },
+    {
+      path: "/student/certificates",
+      name: "Certificates",
+      component: () => import("@/views/CertificatesView.vue"),
+    },
   ],
 });
 
 router.beforeEach((to, from, next) => {
-  const requiresAdmin = to.matched.some(record => record.meta.requiresAdmin);
-  const userInfoString = sessionStorage.getItem('userInfo');
+  const requiresAdmin = to.matched.some((record) => record.meta.requiresAdmin);
+  const userInfoString = sessionStorage.getItem("userInfo");
   let userRoles: string[] = [];
 
   if (userInfoString) {
@@ -101,22 +108,22 @@ router.beforeEach((to, from, next) => {
       }
     } catch (e) {
       console.error("Error parsing userInfo from sessionStorage:", e);
-      sessionStorage.removeItem('userInfo');
-      sessionStorage.removeItem('jwt');
+      sessionStorage.removeItem("userInfo");
+      sessionStorage.removeItem("jwt");
     }
   }
 
-  const isAuthenticated = !!sessionStorage.getItem('jwt');
+  const isAuthenticated = !!sessionStorage.getItem("jwt");
 
   if (requiresAdmin) {
-    if (isAuthenticated && userRoles.includes('ADMIN')) {
+    if (isAuthenticated && userRoles.includes("ADMIN")) {
       next();
     } else if (isAuthenticated) {
-      alert('No tienes permisos de administrador para acceder a esta página.');
+      alert("No tienes permisos de administrador para acceder a esta página.");
       next(from.path);
     } else {
-      alert('Debes iniciar sesión para acceder a esta página.');
-      next('/login');
+      alert("Debes iniciar sesión para acceder a esta página.");
+      next("/login");
     }
   } else {
     next();

@@ -39,6 +39,7 @@ watch(
         <RouterLink to="/student/courses">Explorar Cursos</RouterLink>
         <RouterLink to="/student/profile">Mi Perfil</RouterLink>
         <RouterLink to="/student/my-enrollments">Mis Cursos</RouterLink>
+        <RouterLink to="/student/certificates">Mis Certificados</RouterLink>
       </nav>
     </div>
   </header>

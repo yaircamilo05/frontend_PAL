@@ -1,5 +1,6 @@
 import type { Role } from "@/models/Roles.model";
 import type { UserCreate } from "@/models/User.model";
+import type { Certificate } from '@/models/Certificate.model';
 import axios from "axios";
 
 const API_BASE_URL = "http://localhost:8080/api";
@@ -184,5 +185,38 @@ export const getExamResultsByUser = (examId: number, userId: number) => {
   return api.get(`/exams/results/${examId}/all?userId=${userId}`);
 }
 
+// ---------------------------
+// Certificados
+// ---------------------------
+
+export const fetchStudentCertificates = async (studentId: number) => {
+  const response = await api.get(`/certificates/student/${studentId}`);
+  return response.data;
+};
+
+export const generateCertificate = async (courseId: number, studentId: number) => {
+  const response = await api.post(`/certificates/generate/${courseId}?studentId=${studentId}`);
+  return response.data;
+};
+
+export const downloadCertificate = async (certificateId: number) => {
+  const response = await api.get(`/certificates/download/${certificateId}`, {
+    responseType: 'blob',
+  });
+  return response.data;
+};
+
+// ---------------------------
+// Cursos por inscripción
+// ---------------------------
+
+export const fetchStudentEnrolledCourses = async (studentId: number) => {
+  const response = await api.get(`/enrollments/student/${studentId}`);
+  return response.data;
+};
+
+// ---------------------------
+// Exportación del cliente principal
+// ---------------------------
 
 export default api;
