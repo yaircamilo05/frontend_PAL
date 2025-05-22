@@ -14,13 +14,17 @@
     </div>
     <div v-else class="course-content">
       <h1 class="text-2xl font-bold mb-4">{{ courseDetails.title }}</h1>
-      
+
       <div class="bg-[#212121] p-4 rounded-md mb-6">
         <h2 class="text-xl font-semibold mb-2">Información del curso</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
-            <p class="text-gray-400"><span class="font-medium text-white">Categoría:</span> {{ courseDetails.category }}</p>
-            <p class="text-gray-400"><span class="font-medium text-white">Instructor:</span> {{ courseDetails.instructor }}</p>
+            <p class="text-gray-400">
+              <span class="font-medium text-white">Categoría:</span> {{ courseDetails.category.name}}
+            </p>
+            <p class="text-gray-400">
+              <span class="font-medium text-white">Instructor:</span> {{ courseDetails.instructor.username}}
+            </p>
           </div>
         </div>
         <div class="mt-4">
@@ -29,7 +33,6 @@
         </div>
       </div>
 
-      
       <div class="bg-[#212121] p-4 rounded-md mb-6">
         <h2 class="text-xl font-semibold mb-4">Material del curso</h2>
         <div v-if="courseDetails.exams && courseDetails.exams.length > 0">
@@ -38,8 +41,8 @@
             <li v-for="(exam, index) in courseDetails.exams" :key="exam.id" class="flex items-center">
               <span class="inline-block w-6 h-6 bg-vue-green text-center rounded-full mr-3">{{ index + 1 }}</span>
               <span>{{ exam.title }}</span>
-              <button 
-                @click="handleStartExam(exam)" 
+              <button
+                @click="handleStartExam(exam)"
                 class="ml-auto py-1 px-3 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded"
               >
                 Iniciar
@@ -57,12 +60,11 @@
         </div>
       </div>
 
-      <!-- Nuevo componente para exámenes realizados -->
       <div class="bg-[#212121] p-4 rounded-md">
         <h2 class="text-xl font-semibold mb-4">Mis evaluaciones</h2>
         <div class="text-center mb-4">
-          <button 
-            @click="navigateToCompletedExams" 
+          <button
+            @click="navigateToCompletedExams"
             class="py-2 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded transition-colors duration-200 flex items-center mx-auto"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
@@ -80,7 +82,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted} from 'vue';
+import { ref, onMounted } from 'vue';
 import { getCourseDetails } from '@/services/api';
 import { success, error } from '@/composables/alerts';
 
@@ -90,11 +92,21 @@ interface ExamGetBasic {
   description: string;
 }
 
+interface Instructor {
+  id: number;
+  username: string;
+}
+
+interface Category {
+  id: number;
+  name: string;
+}
+
 interface CourseDetails {
   title: string;
   description: string;
-  category: string;
-  instructor: string;
+  category: Category;
+  instructor: Instructor;
   exams: ExamGetBasic[];
 }
 
@@ -118,11 +130,9 @@ onMounted(async () => {
     console.log('Cargando detalles del curso con ID:', props.courseId);
     const { data } = await getCourseDetails(props.courseId);
     console.log('Datos recibidos del API:', data);
-    
-    // Verificamos si hay que adaptar la estructura de datos
+
     if (data && !data.exams && data.examsNames) {
-      // Si en lugar de 'exams' viene 'examsNames', adaptamos la estructura
-      data.exams = Array.isArray(data.examsNames) 
+      data.exams = Array.isArray(data.examsNames)
         ? data.examsNames.map((name: string, index: number) => ({
             id: index + 1,
             title: name,
@@ -130,7 +140,7 @@ onMounted(async () => {
           }))
         : [];
     }
-    
+
     courseDetails.value = data;
   } catch (e: any) {
     console.error('Error al cargar los detalles del curso:', e);
@@ -141,34 +151,28 @@ onMounted(async () => {
 });
 
 function handleStartExam(exam: ExamGetBasic) {
-  console.log('Iniciando examen:', exam.title);
   emit('start-exam', { courseId: props.courseId, examId: exam.id, examTitle: exam.title });
-  console.log('Iniciando examen:', exam.title, 'con ID:', exam.id);
-  
-  // Verificamos que el usuario esté autenticado
+
   const userInfo = JSON.parse(sessionStorage.getItem('userInfo') || '{}');
   const userId = userInfo.id;
-  
+
   if (!userId) {
     showError('Error', 'Necesitas iniciar sesión para realizar este examen.');
     return;
   }
-  
-  // Navegar a la ruta del examen
+
   window.location.href = `/student/exam/${exam.id}?userId=${userId}&returnTo=/student/course/${props.courseId}`;
 }
 
 function navigateToCompletedExams() {
-  // Obtenemos el ID del usuario desde el sessionStorage
   const userInfo = JSON.parse(sessionStorage.getItem('userInfo') || '{}');
   const userId = userInfo.id;
-  
+
   if (!userId) {
     showError('Error', 'Necesitas iniciar sesión para ver tus exámenes realizados.');
     return;
   }
-  
-  // Navegar a la página de exámenes completados
+
   window.location.href = `/student/completed-exams/${props.courseId}/${userId}`;
 }
 </script>
