@@ -97,6 +97,10 @@ const router = createRouter({
     name: 'ReportesProgreso',
     component: () => import("@/views/StudentProgressReportView.vue"),
     },
+    {
+    path: '/google-redirect',
+    component: () => import('@/views/GoogleLoginRedirect.vue')
+    }
   ], 
 });
 

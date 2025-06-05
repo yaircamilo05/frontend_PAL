@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-6">
-    <h2 class="text-xl font-semibold">Reportes de Progreso del Estudiante</h2>
+    <h2 class="text-xl font-semibold">Reportes de progreso del curso</h2>
 
     <!-- Generar reporte -->
     <div class="bg-gray-100 dark:bg-[#292929] p-4 rounded-md border border-gray-300 space-y-4">

